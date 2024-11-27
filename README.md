@@ -33,7 +33,7 @@
         </checksum>
         <URLBestand>https://www.example.com/bouwtekening-003.jpg</URLBestand>
         <isRepresentatieVan>
-            <verwijzingNaam>Bouwtekening polderstaat</verwijzingNaam>
+            <verwijzingNaam>Bouwtekening Flipje's erf 27</verwijzingNaam>
             <verwijzingIdentificatie>
                 <identificatieKenmerk>Informatieobject-4661a-5a3526</identificatieKenmerk>
                 <identificatieBron>Corsa</identificatieBron>
