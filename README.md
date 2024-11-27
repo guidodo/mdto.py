@@ -1,3 +1,5 @@
+![unit test badge](https://github.com/Regionaal-Archief-Rivierenland/mdto.py/actions/workflows/pytest.yml/badge.svg)
+
 `mdto.py` is een python library die helpt bij het maken van MDTO XML bestanden. Denk bijvoorbeeld aan het semi-automatisch genereren van technische metagegevens, of wat in MDTO het objectsoort 'Bestand' wordt genoemd:
 
 ``` xml
