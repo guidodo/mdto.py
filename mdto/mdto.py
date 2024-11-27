@@ -121,24 +121,6 @@ class VerwijzingGegevens:
     verwijzingNaam: str
     verwijzingIdentificatie: IdentificatieGegevens = None
 
-    # @property
-    # def verwijzingNaam(self):
-    #     """Value of MDTO 'verwijzingNaam' tag.
-
-    #     Valid values:
-    #         any string of up to 80 characters in length
-    #     MDTO docs:
-    #         https://www.nationaalarchief.nl/archiveren/mdto/verwijzingNaam
-    #     """
-    #     return self._verwijzingNaam
-
-    # @verwijzingNaam.setter
-    # def verwijzingNaam(self, val):
-    #     if len(val) > MAX_NAAM_LENGTH:
-    #         _warn(f"value '{val}' of element 'verwijzingNaam' "
-    #               f"exceeds maximum length of {MAX_NAAM_LENGTH}.")
-    #     self._verwijzingNaam = val
-
     def to_xml(self, root: str) -> ET.Element:
         """Transform VerwijzingGegevens into XML tree.
 
