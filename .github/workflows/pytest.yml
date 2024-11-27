@@ -1,4 +1,4 @@
-name: Python tests
+name: Tests
 
 # run tests whenever main gets a commit or PR
 on:
