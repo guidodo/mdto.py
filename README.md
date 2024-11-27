@@ -2,7 +2,7 @@
 
 [![unit test badge](https://github.com/Regionaal-Archief-Rivierenland/mdto.py/actions/workflows/pytest.yml/badge.svg)](https://github.com/Regionaal-Archief-Rivierenland/mdto.py/actions)
 
-`mdto.py` is een python library die helpt bij het maken van [MDTO XML](https://www.nationaalarchief.nl/archiveren/mdto/xml-schema) bestanden. Denk bijvoorbeeld aan het semi-automatisch genereren van technische metagegevens, of wat in MDTO het objectsoort [Bestand](https://www.nationaalarchief.nl/archiveren/mdto/metagegevensschema#collapse-102796) wordt genoemd:
+`mdto.py` is een python library die helpt bij het maken van [MDTO XML](https://www.nationaalarchief.nl/archiveren/mdto/xml-schema) bestanden. Denk bijvoorbeeld aan het automatisch genereren van technische metagegevens, of wat in MDTO het objectsoort [Bestand](https://www.nationaalarchief.nl/archiveren/mdto/metagegevensschema#collapse-102796) wordt genoemd:
 
 ``` xml
 <?xml version='1.0' encoding='UTF-8'?>
@@ -120,7 +120,7 @@ with open("informatieobject.xml", 'w') as output_file:
     xml.write(output_file, xml_declaration=True, short_empty_elements=False)
 ```
 
-`mdto.py` zorgt er voor dat al deze informatie in de juiste volgorde in de XML terechtkomt — de output bestanden zijn altijd 100% valide MDTO.
+`mdto.py` zorgt dat al deze informatie in de juiste volgorde in de XML terechtkomt — de output bestanden zijn altijd 100% valide MDTO.
 
 In tegenstelling tot python's ingebouwde XML library [`xml.etree`](https://docs.python.org/3/library/xml.etree.elementtree.html) kun je het bovenstaand `informatieobject` gemakkelijk inspecteren en veranderen, bijvoorbeeld via `print()`:
 
@@ -132,7 +132,7 @@ Informatieobject(naam='Verlenen kapvergunning Hooigracht 21 Den Haag',  identifi
 'VERLENEN KAPVERGUNNING HOOIGRACHT 21 DEN HAAG'
 ```
 
-Je kan op een vergelijkbare wijze Bestand objecten bouwen via de `Bestand()` class. Het is vaak echter simpeler om hiervoor de _convience_ functie `create_bestand()` te gebruiken, omdat deze veel gegevens, zoals PRONOM informatie en checksums, automatisch voor je aanmaakt:
+Je kan op een vergelijkbare manier Bestand objecten bouwen via de `Bestand()` class. Het is vaak echter simpeler om hiervoor de _convience_ functie `create_bestand()` te gebruiken, omdat deze veel gegevens, zoals PRONOM informatie en checksums, automatisch voor je aanmaakt:
 
 
 ```python
