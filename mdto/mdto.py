@@ -228,14 +228,16 @@ class TermijnGegevens:
 
         return root
 
+
 @dataclass
 class ChecksumGegevens:
     """https://www.nationaalarchief.nl/archiveren/mdto/checksum
 
-    Note: 
+    Note:
         When building Bestand objects, it's recommended to call the convience function `create_bestand()` instead.
         Moreover, if you just need to update a Bestand object's checksum, you should use `create_checksum()`.
     """
+
     checksumAlgoritme: BegripGegevens
     checksumWaarde: str
     checksumDatum: str
@@ -756,7 +758,6 @@ class Bestand:
             f"{{{xsi_ns}}}schemaLocation",
             "https://www.nationaalarchief.nl/mdto https://www.nationaalarchief.nl/mdto/MDTO-XML1.0.1.xsd",
         )
-
 
         root = ET.SubElement(mdto, "bestand")
 
