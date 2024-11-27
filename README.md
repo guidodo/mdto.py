@@ -9,7 +9,7 @@
 <MDTO xmlns="https://www.nationaalarchief.nl/mdto" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://www.nationaalarchief.nl/mdto https://www.nationaalarchief.nl/mdto/MDTO-XML1.0.1.xsd">
     <bestand>
         <identificatie>
-            <identificatieKenmerk>345c-4379</identificatieKenmerk>
+            <identificatieKenmerk>Bestand-345c-4379</identificatieKenmerk>
             <identificatieBron>Corsa</identificatieBron>
         </identificatie>
         <naam>bouwtekening-003.jpg</naam>
