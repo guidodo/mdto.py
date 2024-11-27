@@ -1,6 +1,6 @@
 # mdto.py
 
-![unit test badge](https://github.com/Regionaal-Archief-Rivierenland/mdto.py/actions/workflows/pytest.yml/badge.svg)
+[![unit test badge](https://github.com/Regionaal-Archief-Rivierenland/mdto.py/actions/workflows/pytest.yml/badge.svg)](https://github.com/Regionaal-Archief-Rivierenland/mdto.py/actions)
 
 `mdto.py` is een python library die helpt bij het maken van [MDTO](https://www.nationaalarchief.nl/archiveren/mdto) XML bestanden. Denk bijvoorbeeld aan het semi-automatisch genereren van technische metagegevens, of wat in MDTO het objectsoort [Bestand](https://www.nationaalarchief.nl/archiveren/mdto/metagegevensschema#collapse-102796) wordt genoemd:
 
