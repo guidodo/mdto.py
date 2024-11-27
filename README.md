@@ -120,7 +120,7 @@ with open("informatieobject.xml", 'w') as output_file:
     xml.write(output_file, xml_declaration=True, short_empty_elements=False)
 ```
 
-`mdto.py` zorgt dat al deze informatie in de juiste volgorde in de XML terechtkomt — de output bestanden zijn altijd 100% valide MDTO.
+`mdto.py` zorgt dat al deze informatie in de juiste volgorde in de XML terechtkomt — resulterende bestanden zijn altijd 100% valide MDTO.
 
 In tegenstelling tot python's ingebouwde XML library [`xml.etree`](https://docs.python.org/3/library/xml.etree.elementtree.html) kun je het bovenstaand `informatieobject` gemakkelijk inspecteren en veranderen, bijvoorbeeld via `print()`:
 
