@@ -27,24 +27,27 @@ def download_mdto_voorbeelden(target_dir):
 
 
 @pytest.fixture
-def mdto_example_files(pytestconfig, tmp_path_factory):
+def mdto_example_files(pytestconfig, tmp_path_factory) -> dict:
     """Make (cached) MDTO example files available as a fixture"""
 
     # retrieve path to cached MDTO XML examples
     cache_path = pytestconfig.cache.get("voorbeelden/cache_path", None)
     # check if cached files exists
     if cache_path is None or not all(
-        ((cache_path := Path(cache_path)) / xml_file).exists()
+        (Path(cache_path) / xml_file).exists()
         for xml_file in xml_voorbeelden
     ):
         # download MDTO XML examples to tmpdir
         cache_path = tmp_path_factory.mktemp("MDTO Voorbeeld Bestanden")
         download_mdto_voorbeelden(cache_path)
+        # store new location in pytest cache
         pytestconfig.cache.set("voorbeelden/cache_path", str(cache_path))
 
+    # cast str to Path
+    cache_path = Path(cache_path)
     # create {filename : file_path} dict
     xml_file_paths = {
-        xml_file.removeprefix(prefix): str(cache_path / xml_file)
+        xml_file.removeprefix(prefix): cache_path / xml_file
         for xml_file in xml_voorbeelden
         if (cache_path / xml_file).exists()
     }
