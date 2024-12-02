@@ -61,7 +61,7 @@ cd mdto.py
 sudo pip install . # Windows gebruikers kunnen "sudo" hier weglaten
 ```
 
-## Binnen een virtual environment
+## Installatie in een virtual environment
 
 <details>
 <summary>Windows</summary>
