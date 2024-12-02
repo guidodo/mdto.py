@@ -9,7 +9,7 @@ def serialization_chain(xmlfile: str) -> str:
     to_xml().
 
     Args:
-        xmlfile: the xmlfile to run the chain on
+        xmlfile (str): the xmlfile to run the chain on
 
     Returns:
         str: the re-serailized XML, as a string
@@ -98,3 +98,5 @@ def test_serialization_chain_bestand(voorbeeld_bestand_xml):
 
     # Ensure the serialized XML matches the original
     assert output_xml == original_xml
+
+
