@@ -4,6 +4,8 @@ import zipfile
 from io import BytesIO
 from pathlib import Path
 
+xsd_filename = "MDTO-XML1.0.1.xsd"
+xsd_url = f"https://www.nationaalarchief.nl/mdto/{xsd_filename}"
 xml_url = "https://www.nationaalarchief.nl/sites/default/files/field-file/MDTO-XML%201.0.1%20Voorbeelden%20%283%29.zip"
 
 # list of example files in the zip file
@@ -24,6 +26,15 @@ def download_mdto_voorbeelden(target_dir):
     # unpack zip file
     with zipfile.ZipFile(BytesIO(response.content)) as zip_ref:
         zip_ref.extractall(target_dir)
+
+
+def download_mdto_xsd(target_dir):
+    """Download MDTO XSD to `target_dir`"""
+    response = requests.get(xsd_url)
+    response.raise_for_status()  # raise error if download failed
+
+    with open(target_dir / xsd_filename, "w") as f:
+        f.write(response.text)
 
 
 @pytest.fixture
@@ -53,6 +64,24 @@ def mdto_example_files(pytestconfig, tmp_path_factory) -> dict:
     }
 
     return xml_file_paths
+
+
+@pytest.fixture
+def mdto_xsd(pytestconfig, tmp_path_factory) -> Path:
+    """Make (cached) MDTO XSD available as a fixture"""
+
+    # retrieve path to cached XSD
+    cache_path = pytestconfig.cache.get("xsd/cache_path", None)
+
+    # check if cached XSD exists
+    if cache_path is None or not (Path(cache_path) / xsd_filename).exists():
+        # download MDTO XSD examples to tmpdir
+        cache_path = tmp_path_factory.mktemp("MDTO XSD")
+        download_mdto_xsd(cache_path)
+        # store new location in pytest cache
+        pytestconfig.cache.set("xsd/cache_path", str(cache_path))
+
+    return str(Path(cache_path) / xsd_filename)
 
 
 @pytest.fixture
