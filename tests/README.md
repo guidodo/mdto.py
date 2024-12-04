@@ -1,4 +1,4 @@
-# Tests afhankelijkheden
+# Test afhankelijkheden
 
 [`pytest`](https://pypi.org/project/pytest/) en de afhankelijkheden van `mdto.py` zijn genoeg om alle tests uit te voeren.
 
