@@ -5,6 +5,7 @@ import subprocess
 import hashlib
 from typing import TextIO, List
 from datetime import datetime
+from dataclasses import dataclass
 import lxml.etree as ET
 
 # Make into an optional dependency?
