@@ -6,6 +6,7 @@ import hashlib
 from typing import TextIO, List
 from datetime import datetime
 from dataclasses import dataclass
+from pathlib import Path
 import lxml.etree as ET
 
 # Make into an optional dependency?
@@ -26,8 +27,8 @@ def _process_file(file_or_filename) -> TextIO:
         The returned file-object is always in read-only mode.
     """
 
-    # filename?
-    if isinstance(file_or_filename, str):
+    # filename or path?
+    if isinstance(file_or_filename, (str, Path)):
         return open(file_or_filename, "r")
     # file-like object?
     elif hasattr(file_or_filename, "read"):
