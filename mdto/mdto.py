@@ -6,8 +6,6 @@ import hashlib
 from typing import TextIO, List
 from datetime import datetime
 import lxml.etree as ET
-from dataclasses import dataclass
-from functools import partial
 
 # Make into an optional dependency?
 import validators
