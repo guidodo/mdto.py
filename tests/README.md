@@ -5,9 +5,7 @@
 # Het uitvoeren van de tests
 
 ``` shellsession
-# move into project dir
-$ cd projecten/mdto
-# install test dependencies
+$ cd projecten/mdto # move into project dir
 $ paru -S pytest # adapt to your operating system/preferences
 $ pip install .
 $ pytest
