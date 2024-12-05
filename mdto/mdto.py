@@ -492,9 +492,10 @@ class Object:
     This class serves as the parent class to Informatieobject and Bestand.
     Hence, there is generally little reason to use it directly.
 
-    MDTO objects that derive from this class have a save() method, which can be used
+    MDTO objects that derive from this class inherit a save() method, which can be used
     to write an Informatieobject/Bestand to a XML file.
     """
+
     naam: str
     identificatie: IdentificatieGegevens
 
@@ -506,6 +507,30 @@ class Object:
                 f"exceeds maximum length of {MAX_NAAM_LENGTH}."
             )
 
+    def to_xml(self):
+        pass
+
+    def save(
+        self,
+        file_or_filename: str | TextIO,
+        kwargs={"xml_declaration": True, "pretty_print": True, "encoding": "UTF-8"},
+    ) -> None:
+        """Save object to an XML file.
+
+        Args:
+            file_or_filename (str | TextIO): Path or file-object to write the object's XML representation to.
+              If passing a file-like object, the file must be opened in writeable binary mode (i.e. `wb`).
+            kwargs (dict, optional): Extra keyword arguments to pass to lxml's write() method
+
+        Note:
+            For a complete list of options for lxml's write method, see
+            https://lxml.de/apidoc/lxml.etree.html#lxml.etree._ElementTree.write
+        """
+
+        xml = self.to_xml()
+        xml.write(file_or_filename, **kwargs)
+
+
 # TODO: place more restrictions on taal?
 @dataclass
 class Informatieobject(Object):
@@ -516,9 +541,8 @@ class Informatieobject(Object):
     ```python
     informatieobject = Informatieobject(IdentificatieGegevens(…), naam="Kapvergunning", …)
 
-    xml = informatieobject.to_xml()
-    with open("informatieobject.xml", 'w') as output_file:
-        xml.write(output_file, xml_declaration=True, short_empty_elements=False)
+    # write object to file
+    informatieobject.save("Informatieobject-368-Kapvergunning.xml")
     ```
 
     Args:
@@ -581,8 +605,11 @@ class Informatieobject(Object):
         </MDTO>
         ```
 
+        Note:
+           When trying to save a Informatieobject to a file, use `my_informatieobject.save('file.xml')` instead.
+
         Returns:
-            ET.ElementTree: XML tree representing the Informatieobject object.
+            ET.ElementTree: XML tree representing the Informatieobject object
         """
 
         # construct attributes of <MDTO>
@@ -750,8 +777,11 @@ class Bestand(Object):
         </MDTO>
         ```
 
+        Note:
+           When trying to save a Bestand object to a file, use `my_bestand.save('file.xml')` instead.
+
         Returns:
-            ET.ElementTree: XML tree representing Bestand object. This object can be written to a file by calling `.write()`.
+            ET.ElementTree: XML tree representing Bestand object
         """
 
         # construct attributes of <MDTO>
@@ -1083,9 +1113,7 @@ def from_file(xmlfile: str) -> Informatieobject | Bestand:
     informatieobject.naam = "Verlenen kapvergunning Flipje's Erf 15 Tiel"
 
     # save it to a new file
-    xml = informatieobject.to_xml()
-    with open("Nieuw informatieobject.xml", 'w') as output_file:
-        xml.write(output_file, xml_declaration=True, short_empty_elements=False)
+    informatieobject.save("path/to/new/file.xml")
     ```
 
     Args:

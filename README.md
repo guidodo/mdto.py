@@ -97,7 +97,7 @@ De primaire doelstellingen van `mdto.py` is het versimpelen van het bouwen van M
 from mdto import *
 
 # maak identificatiekenmerk element
-informatieobject_id = IdentificatieGegevens("Informatieobject-4661a-5a3526fh654ee", "Proza (OCW-DMS)")
+informatieobject_id = IdentificatieGegevens("Informatieobject-4661a", "Proza (OCW-DMS)")
 
 # maak waardering element
 waardering = BegripGegevens(begripLabel="Tijdelijk te bewaren",
@@ -116,10 +116,8 @@ informatieobject = Informatieobject(identificatie = informatieobject_id,
                  archiefvormer = VerwijzingGegevens("'s-Gravenhage"),
                  beperkingGebruik = beperkingGebruik)
 
-# schrijf informatieobject naar een bestand
-xml = informatieobject.to_xml()
-with open("informatieobject.xml", 'w') as output_file:
-    xml.write(output_file, xml_declaration=True, short_empty_elements=False)
+# schrijf informatieobject naar een XML bestand
+informatieobject.save("informatieobject-4661a.mdto.xml")
 ```
 
 `mdto.py` zorgt dat al deze informatie in de juiste volgorde in de XML terechtkomt — resulterende bestanden zijn altijd 100% valide MDTO.
@@ -141,14 +139,11 @@ Je kan op een vergelijkbare manier Bestand objecten bouwen via de `Bestand()` cl
 from mdto import *
 
 # 'informatieobject_001.xml' is het informatieobject waar het Bestand object een representatie van is
-with open('informatieobject_001.xml') as info_object:
+with open('informatieobject_001.mdto.xml') as info_object:
     bestand = create_bestand("vergunning.pdf", '34c5-4379-9f1a-5c378', 'Proza (DMS)', representatievan=info_object)
 
-xml = bestand.to_xml()
-
-# Schrijf xml naar bestand
-with open("bestand.xml", 'w') as output_file:
-    xml.write(output_file, xml_declaration=True, short_empty_elements=False)
+# Sla op als XML bestand
+bestand.save("vergunning.bestand.mdto.xml")
 ```
 
 Het resulterende XML bestand bevat vervolgens de correcte `<omvang>`, `<bestandsformaat>`, `<checksum>` , en `<isRepresentatieVan>` tags. `<URLBestand>` tags kunnen ook worden aangemaakt worden via de optionele `url=` parameter van `create_bestand()`. URLs worden automatisch gevalideerd via de [validators python library](https://pypi.org/project/validators/).
@@ -176,20 +171,18 @@ from pathlib import Path
 
 
 # itereer door alle Bestand XMLs:
-for bestand_xml_path in Path('.').rglob('*.bestand.mdto.xml'):
-    bestand = mdto.from_file(bestand_xml)
+for bestand_path in Path('.').rglob('*.bestand.mdto.xml'):
+    bestand = mdto.from_file(bestand_path)
 
     # vind naam + path van het te updaten bestand
-    filename = bestand.naam
-    filepath = str(bestand_xml_path.parent / filename)
+    filename = bestand.naam  # in de regel bevat <naam> de bestandsnaam
+    filepath = str(bestand_path.parent / filename)
 
     # maak een nieuwe checksum
     bestand.checksum = mdto.create_checksum(filepath)
 
-    # schrijf geüpdatet Bestand object terug naar een XML file
-    xml = bestand.to_xml()
-    with open(bestand_xml, 'w') as output_file:
-        xml.write(output_file, xml_declaration=True, short_empty_elements=False)
+    # schrijf geüpdatet Bestand object terug naar de oorspronkelijke XML file
+    bestand.save(bestand_path)
 ```
 
 ## Autocompletion & documentatie in je teksteditor/IDE
