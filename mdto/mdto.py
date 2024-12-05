@@ -497,7 +497,7 @@ class Object:
     """
 
     naam: str
-    identificatie: IdentificatieGegevens
+    identificatie: IdentificatieGegevens | List[IdentificatieGegevens]
 
     def __post_init__(self):
         # check if name is of the right length
