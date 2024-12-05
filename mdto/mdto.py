@@ -287,8 +287,7 @@ class BeperkingGebruikGegevens:
 
     beperkingGebruikType: BegripGegevens
     beperkingGebruikNadereBeschrijving: str = None
-    # TODO: this can be a list
-    beperkingGebruikDocumentatie: VerwijzingGegevens = None
+    beperkingGebruikDocumentatie: VerwijzingGegevens | list[VerwijzingGegevens] = None
     beperkingGebruikTermijn: TermijnGegevens = None
 
     def to_xml(self) -> ET.Element:
