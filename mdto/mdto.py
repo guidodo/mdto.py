@@ -1061,11 +1061,12 @@ def create_checksum(
     `checksumDatum`) from that file.
 
     Example:
-    ```python
-    pdf_checksum = create_checksum('document.pdf')
-    # create ChecksumGegevens with a 512 bits instead of a 256 bits checksum
-    jpg_checksum = create_checksum('scan-003.jpg', algorithm="sha512")
-    ```
+
+        ```python
+        pdf_checksum = create_checksum('document.pdf')
+        # create ChecksumGegevens with a 512 bits instead of a 256 bits checksum
+        jpg_checksum = create_checksum('scan-003.jpg', algorithm="sha512")
+        ```
 
     Args:
         infile (TextIO | str): file-like object to generate checksum data for
