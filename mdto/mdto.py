@@ -281,8 +281,7 @@ class BeperkingGebruikGegevens:
         beperkingGebruikType (BegripGegevens): Typering van de beperking
         beperkingGebruikNadereBeschrijving (str, optional): Beschrijving van de beperking
         beperkingGebruikDocumentatie (VerwijzingGegevens, optional): Verwijzing naar een beschrijving van de beperking
-        # FIXME: should be termijnGegevens
-        beperkingGebruikTermijn (str, optional): Termijn waarbinnen de beperking op het gebruik van toepassing is
+        beperkingGebruikTermijn (TermijnGegevens, optional): Termijn waarbinnen de beperking van toepassing is
     """
 
     beperkingGebruikType: BegripGegevens
