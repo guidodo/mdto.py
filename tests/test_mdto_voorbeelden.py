@@ -95,5 +95,3 @@ def test_serialization_chain_bestand(voorbeeld_bestand_xml):
 
     # Ensure the serialized XML matches the original
     assert output_xml == original_xml
-
-
