@@ -20,9 +20,6 @@ def serialization_chain(xmlfile: str) -> str:
     # Serialize back to XML
     output_tree = object.to_xml()
 
-    # MDTO uses tabs instead of spaces
-    ET.indent(output_tree, space="\t")
-
     return (
         ET.tostring(
             output_tree.getroot(),
