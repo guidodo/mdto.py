@@ -485,10 +485,30 @@ class BetrokkeneGegevens:
         return root
 
 
-# TODO: this should be a subclass of a general object class
+@dataclass
+class Object:
+    """https://www.nationaalarchief.nl/archiveren/mdto/object
+
+    This class serves as the parent class to Informatieobject and Bestand.
+    Hence, there is generally little reason to use it directly.
+
+    MDTO objects that derive from this class have a save() method, which can be used
+    to write an Informatieobject/Bestand to a XML file.
+    """
+    naam: str
+    identificatie: IdentificatieGegevens
+
+    def __post_init__(self):
+        # check if name is of the right length
+        if len(self.naam) > MAX_NAAM_LENGTH:
+            _warn(
+                f"value '{self.naam}' of element 'naam' "
+                f"exceeds maximum length of {MAX_NAAM_LENGTH}."
+            )
+
 # TODO: place more restrictions on taal?
 @dataclass
-class Informatieobject:
+class Informatieobject(Object):
     """https://www.nationaalarchief.nl/archiveren/mdto/informatieobject
 
     Example:
@@ -693,7 +713,7 @@ class Informatieobject:
 
 
 @dataclass
-class Bestand:
+class Bestand(Object):
     """https://www.nationaalarchief.nl/archiveren/mdto/bestand
 
     Note:
@@ -717,15 +737,6 @@ class Bestand:
     checksum: ChecksumGegevens | List[ChecksumGegevens]
     isRepresentatieVan: VerwijzingGegevens
     URLBestand: str = None
-
-    def __post_init__(self):
-        # check if name is of the right length
-        # the getter and setter created weird errors
-        if len(self.naam) > MAX_NAAM_LENGTH:
-            _warn(
-                f"value '{self.naam}' of element 'naam' "
-                f"exceeds maximum length of {MAX_NAAM_LENGTH}."
-            )
 
     def to_xml(self) -> ET.ElementTree:
         """
