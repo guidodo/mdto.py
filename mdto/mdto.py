@@ -744,7 +744,7 @@ class Bestand(Object):
     """https://www.nationaalarchief.nl/archiveren/mdto/bestand
 
     Note:
-        When creating Bestand XML files, it's easier to use the
+        When creating Bestand objects, it's easier to use the
         `create_bestand()` convenience function instead.
 
     Args:
