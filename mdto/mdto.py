@@ -494,8 +494,8 @@ class Object:
     to write an Informatieobject/Bestand to a XML file.
     """
 
-    naam: str
     identificatie: IdentificatieGegevens | List[IdentificatieGegevens]
+    naam: str
 
     def __post_init__(self):
         # check if name is of the right length
