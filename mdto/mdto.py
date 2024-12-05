@@ -544,8 +544,8 @@ class Informatieobject(Object):
     ```
 
     Args:
-        naam (str): Betekenisvolle aanduiding waaronder het object bekend is
         identificatie (IdentificatieGegevens | List[IdentificatieGegevens]): Gegevens waarmee het object geïdentificeerd kan worden
+        naam (str): Betekenisvolle aanduiding waaronder het object bekend is
         archiefvormer (VerwijzingGegevens | List[VerwijzingGegevens]): Organisatie die verantwoordelijk is voor het opmaken en/of ontvangen van het informatieobject
         beperkingGebruik (BeperkingGebruikGegevens | List[BeperkingGebruikGegevens]): Beperking die gesteld is aan het gebruik van het informatieobject
         waardering (BegripGegevens): Waardering van het informatieobject volgens een selectielijst
@@ -568,8 +568,8 @@ class Informatieobject(Object):
         activiteit (VerwijzingGegevens, optional): Bedrijfsactiviteit waarbij het informatieobject door de archiefvormer is ontvangen of gemaakt
     """
 
-    naam: str
     identificatie: IdentificatieGegevens | List[IdentificatieGegevens]
+    naam: str
     archiefvormer: VerwijzingGegevens | List[VerwijzingGegevens]
     beperkingGebruik: BeperkingGebruikGegevens | List[BeperkingGebruikGegevens]
     waardering: BegripGegevens
