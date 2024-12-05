@@ -1137,6 +1137,7 @@ def from_file(xmlfile: str) -> Informatieobject | Bestand:
             # add value of parsed child element to class constructor args
             constructor_args[mdto_field].append(xml_parser(child))
 
+        # cleanup constructor args
         for argname, value in constructor_args.items():
             # Convert empty argument lists into None values
             if len(value) == 0:
