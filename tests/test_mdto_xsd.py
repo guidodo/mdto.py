@@ -46,7 +46,7 @@ def test_automatic_bestand_xml_validity(mdto_xsd, voorbeeld_archiefstuk_xml):
 
     # use this .py file for automatic metadata generation
     example_file = Path(__file__)
-    # create Bestand object from README.md + existing informatieobject
+    # create Bestand object from example_file + existing informatieobject
     bestand = create_bestand(
         example_file,
         "abcd-1234",
