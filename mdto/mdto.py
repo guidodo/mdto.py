@@ -721,8 +721,8 @@ class Bestand(Object):
         `create_bestand()` convenience function instead.
 
     Args:
-        identificatie (IdentificatieGegevens): Gegevens waarmee het object geïdentificeerd kan worden
         naam (str): Een betekenisvolle aanduiding waaronder het object bekend is
+        identificatie (IdentificatieGegevens): Gegevens waarmee het object geïdentificeerd kan worden
         omvang (int): Aantal bytes in het bestand
         bestandsformaat (BegripGegevens): Manier waarop de informatie in een computerbestand binair gecodeerd is
         checksum (ChecksumGegevens): Checksum gegevens over het bestand
