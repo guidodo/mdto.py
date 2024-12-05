@@ -729,11 +729,9 @@ class Informatieobject(Object):
         for b in self.beperkingGebruik:
             root.append(b.to_xml())
 
-        # can you abstract this? this is now double
-        # on the other hand, formatting preferences should be handled by e.g. xmllint
         tree = ET.ElementTree(mdto)
-        ET.indent(tree, space="\t")  # use tabs as indentation (this matches what MDTO does)
-
+        # use tabs as indentation (this matches what MDTO does)
+        ET.indent(tree, space="\t")
         return tree
 
 
@@ -827,8 +825,9 @@ class Bestand(Object):
         if self.isRepresentatieVan:
             root.append(self.isRepresentatieVan.to_xml("isRepresentatieVan"))
 
+        # use tabs as indentation (this matches what MDTO does)
         tree = ET.ElementTree(mdto)
-        ET.indent(tree, space="\t")  # use tabs as indentation (this matches what MDTO does)
+        ET.indent(tree, space="\t")
 
         return tree
 
