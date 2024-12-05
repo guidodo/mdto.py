@@ -744,8 +744,8 @@ class Bestand(Object):
         `create_bestand()` convenience function instead.
 
     Args:
-        naam (str): Een betekenisvolle aanduiding waaronder het object bekend is
         identificatie (IdentificatieGegevens): Gegevens waarmee het object geïdentificeerd kan worden
+        naam (str): Een betekenisvolle aanduiding waaronder het object bekend is
         omvang (int): Aantal bytes in het bestand
         bestandsformaat (BegripGegevens): Manier waarop de informatie in een computerbestand binair gecodeerd is
         checksum (ChecksumGegevens): Checksum gegevens over het bestand
@@ -753,8 +753,8 @@ class Bestand(Object):
         URLBestand (str, optional): Actuele verwijzing naar het bestand in de vorm van een RFC 3986 conforme URI
     """
 
-    naam: str
     identificatie: IdentificatieGegevens | List[IdentificatieGegevens]
+    naam: str
     omvang: int
     bestandsformaat: BegripGegevens
     checksum: ChecksumGegevens | List[ChecksumGegevens]
@@ -1044,7 +1044,7 @@ def create_bestand(
     infile.close()
 
     return Bestand(
-        naam, ids, omvang, bestandsformaat, checksum, isrepresentatievan, url
+        ids, naam, omvang, bestandsformaat, checksum, isrepresentatievan, url
     )
 
 
