@@ -1,16 +1,8 @@
 import pytest
 import lxml.etree as ET
 from pathlib import Path
-from mdto import (
-    Informatieobject,
-    IdentificatieGegevens,
-    VerwijzingGegevens,
-    BeperkingGebruikGegevens,
-    DekkingInTijdGegevens,
-    GerelateerdInformatieobjectGegevens,
-    BegripGegevens,
-    create_bestand,
-)
+import mdto
+from mdto.gegevensgroepen import *
 
 
 def test_informatieobject_xml_validity(mdto_xsd):
@@ -69,7 +61,7 @@ def test_automatic_bestand_xml_validity(mdto_xsd, voorbeeld_archiefstuk_xml):
     # use this .py file for automatic metadata generation
     example_file = Path(__file__)
     # create Bestand object from example_file + existing informatieobject
-    bestand = create_bestand(
+    bestand = mdto.create_bestand(
         example_file,
         "abcd-1234",
         "Corsa",
