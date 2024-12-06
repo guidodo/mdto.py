@@ -45,8 +45,7 @@ def mdto_example_files(pytestconfig, tmp_path_factory) -> dict:
     cache_path = pytestconfig.cache.get("voorbeelden/cache_path", None)
     # check if cached files exists
     if cache_path is None or not all(
-        (Path(cache_path) / xml_file).exists()
-        for xml_file in xml_voorbeelden
+        (Path(cache_path) / xml_file).exists() for xml_file in xml_voorbeelden
     ):
         # download MDTO XML examples to tmpdir
         cache_path = tmp_path_factory.mktemp("MDTO Voorbeeld Bestanden")
