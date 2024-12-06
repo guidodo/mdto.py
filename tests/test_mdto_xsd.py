@@ -63,8 +63,7 @@ def test_automatic_bestand_xml_validity(mdto_xsd, voorbeeld_archiefstuk_xml):
     # create Bestand object from example_file + existing informatieobject
     bestand = mdto.create_bestand(
         example_file,
-        "abcd-1234",
-        "Corsa",
+        IdentificatieGegevens("abcd-1234", "Corsa"),
         voorbeeld_archiefstuk_xml,
         url="https://example.com/",
     )

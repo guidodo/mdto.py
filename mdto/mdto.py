@@ -770,64 +770,39 @@ def pronominfo(path: str) -> BegripGegevens:
 
 def create_bestand(
     infile: TextIO | str,
-    identificatiekenmerken: List[str] | str,
-    identificatiebronnen: List[str] | str,
-    informatieobject: TextIO,
+    identificatie: IdentificatieGegevens | List[IdentificatieGegevens],
+    informatieobject: TextIO | str,
     naam: str = None,
     url: str = None,
-    quiet: bool = False,
-    force: bool = False,
 ) -> Bestand:
     """Convenience function for creating Bestand objects. The difference between this function
     and calling Bestand() directly is that this function infers most Bestand-related
-    information for you, based on the characteristics of `infile`.
+    information for you (checksum, name, and so on), based on the characteristics of `infile`.
 
-    Supply a list of strings to `identificatiekenmerken` and `identificatiebronnen`
-    if multiple <identificatie> tags are desired. Otherwise, a single str suffices.
 
     Args:
-        infile (TextIO | str): the file the Bestand object should represent
-        identificatiekenmerken (List[str] | str): str or list of str for <identificatieKenmerk> tags
-        identificatiebronnen (List[str] | str): str or list of str for <identificatieBron> tags
-        informatieobject (TextIO | str): path or file-like object that
-            represents an MDTO Informatieobject in XML form.
-            Used to infer values for <isRepresentatieVan>.
-        naam (Optional[str]): value of <naam>. Defaults to the basename of `infile`
-        url (Optional[str]): value of <URLBestand>
-        quiet (Optional[bool]): silence non-fatal warnings
-        force (Optional[bool]): do not exit when encountering would-be invalid tag values
+      infile (TextIO | str): the file the Bestand object should represent
+      identificatie (IdentificatieGegevens | List[IdentificatieGegevens]): Identificatiekenmerk
+      informatieobject (TextIO | str): path or file-like object to a XML file containing an informatieobject.
+        Used to infer values for <isRepresentatieVan>.
+      naam (Optional[str]): value of <naam>. Defaults to the basename of `infile`
+      url (Optional[str]): value of <URLBestand>
 
     Example:
-        ```python
+      ```python
 
-        with open('informatieobject_001.xml') as f:
-            bestand = create_bestand("vergunning.pdf", '34c5-4379-9f1a-5c378', 'Proza (DMS)', informatieobject=f)
-            xml = bestand.to_xml()
-        ```
+      with open('informatieobject_001.xml') as f:
+          bestand = create_bestand("vergunning.pdf",
+                                   IdentificatieGegevens('34c5-4379-9f1a-5c378', 'Proza (DMS)'),
+                                   informatieobject=f)
+          xml = bestand.to_xml()
+      ```
+
+    Returns:
+        Bestand: new Bestand object
     """
-    global _force, _quiet
-    _quiet = quiet
-    _force = force
-
     # allow infile to be a path (str)
     infile = _process_file(infile)
-
-    # permit setting kenmerk and bron to a string
-    if isinstance(identificatiekenmerken, str):
-        identificatiekenmerken = [identificatiekenmerken]
-    if isinstance(identificatiebronnen, str):
-        identificatiebronnen = [identificatiebronnen]
-
-    if len(identificatiekenmerken) != len(identificatiebronnen):
-        _error(
-            "number of 'identificatieKenmerk' tags differs from "
-            "number of 'identificatieBron' tags"
-        )
-
-    ids = [
-        IdentificatieGegevens(k, b)
-        for k, b in zip(identificatiekenmerken, identificatiebronnen)
-    ]
 
     if not naam:
         naam = os.path.basename(infile.name)
@@ -843,7 +818,7 @@ def create_bestand(
     infile.close()
 
     return Bestand(
-        ids, naam, omvang, bestandsformaat, checksum, isrepresentatievan, url
+        identificatie, naam, omvang, bestandsformaat, checksum, isrepresentatievan, url
     )
 
 

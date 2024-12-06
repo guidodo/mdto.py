@@ -136,15 +136,15 @@ Je kan op een vergelijkbare manier Bestand objecten bouwen via de `Bestand()` cl
 
 
 ```python
+from mdto.gegevensgroepen import *
 import mdto
 
 # 'informatieobject_001.xml' is het informatieobject waar het Bestand object een representatie van is
-with open("informatieobject_001.mdto.xml") as info_object:
+with open("informatieobject_001.mdto.xml") as obj:
     bestand = mdto.create_bestand(
-            "vergunning.pdf",
-            "34c5-4379-9f1a-5c378",
-            "Proza (DMS)",
-            representatievan=info_object,
+            infile="vergunning.pdf",  # bestand waarvoor technische metagegevens moeten worden aangemaakt
+            identificatie=Identificatiegegevens("34c5-4379-9f1a-5c378", "Proza (DMS)"),
+            informatieobject=obj,
         )
 
 # Sla op als XML bestand
