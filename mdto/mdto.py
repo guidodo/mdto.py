@@ -181,7 +181,7 @@ class BegripGegevens(XMLSerializable):
     def _mdto_ordered_fields(self) -> List:
         """Sort dataclass fields by their order in the MDTO XSD."""
         fields = super()._mdto_ordered_fields()
-        # swap order of begripBegrippenlijst and begripcode
+        # swap order of begripBegrippenlijst and begripCode
         return fields[:-2] + (fields[2], fields[1])
 
 
