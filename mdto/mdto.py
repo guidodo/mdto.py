@@ -571,13 +571,13 @@ class Bestand(XMLSerializable, Object):
         `create_bestand()` convenience function instead.
 
     Args:
-        identificatie (IdentificatieGegevens): Gegevens waarmee het object geïdentificeerd kan worden
-        naam (str): Een betekenisvolle aanduiding waaronder het object bekend is
+        identificatie (IdentificatieGegevens): Identificatiekenmerk
+        naam (str): Aanduiding waaronder dit object bekend is (meestal bestandsnaam)
         omvang (int): Aantal bytes in het bestand
-        bestandsformaat (BegripGegevens): Manier waarop de informatie in een computerbestand binair gecodeerd is
-        checksum (ChecksumGegevens): Checksum gegevens over het bestand
-        isRepresentatieVan (VerwijzingGegevens): Verwijzing naar het informatieobject waarvan het bestand een (deel van een) representatie is
-        URLBestand (str, optional): Actuele verwijzing naar het bestand in de vorm van een RFC 3986 conforme URI
+        bestandsformaat (BegripGegevens): Bestandsformaat, bijv. PRONOM of MIME-type informatie
+        checksum (ChecksumGegevens): Checksum gegevens van het bestand
+        isRepresentatieVan (VerwijzingGegevens): Object waarvan dit bestand een representatie is
+        URLBestand (str, optional): Actuele verwijzing naar dit bestand als RFC 3986 conforme URI
     """
 
     omvang: int
