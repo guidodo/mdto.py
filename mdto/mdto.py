@@ -887,9 +887,8 @@ def create_checksum(
     return ChecksumGegevens(checksumAlgoritme, checksumWaarde, checksumDatum)
 
 
-# TODO: this type annotation should be redone when the abstract Object class is implemented
 # Q: should this also accept file objects?
-def from_file(xmlfile: str) -> Informatieobject | Bestand:
+def from_file(xmlfile: str) -> Object:
     """Construct a Informatieobject/Bestand object from a MDTO XML file.
 
     Note:
