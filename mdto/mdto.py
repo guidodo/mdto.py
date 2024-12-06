@@ -157,7 +157,7 @@ class VerwijzingGegevens(XMLSerializable):
 
     Args:
         verwijzingNaam (str): Naam van het object waarnaar verwezen wordt
-        verwijzingIdentificatie (IdentificatieGegevens, optional): Identificatie van het object waarnaar verwezen wordt
+        verwijzingIdentificatie (IdentificatieGegevens, optional): Identificatie van object waarnaar verwezen wordt
     """
 
     verwijzingNaam: str
