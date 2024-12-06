@@ -7,6 +7,7 @@ from mdto import (
     VerwijzingGegevens,
     BeperkingGebruikGegevens,
     DekkingInTijdGegevens,
+    GerelateerdInformatieobjectGegevens,
     BegripGegevens,
     create_bestand,
 )
@@ -24,13 +25,27 @@ def test_informatieobject_xml_validity(mdto_xsd):
         beperkingGebruik=BeperkingGebruikGegevens(
             BegripGegevens("nvt", VerwijzingGegevens("geen"))
         ),
+        waardering=BegripGegevens(
+            "V", VerwijzingGegevens("Begrippenlijst Waarderingen MDTO")
+        ),
+        # These elements are added to increase test coverge
         dekkingInTijd=DekkingInTijdGegevens(
-            BegripGegevens("Looptijd dossier", VerwijzingGegevens("Begrippenlijst Events en Periode's Corsa")),
+            BegripGegevens(
+                "Looptijd dossier",
+                VerwijzingGegevens("Begrippenlijst Events en Periode's Corsa"),
+            ),
             dekkingInTijdBegindatum="1999",
             dekkingInTijdEinddatum="2005",
         ),
-        waardering=BegripGegevens(
-            "V", VerwijzingGegevens("Begrippenlijst Waarderingen MDTO")
+        aanvullendeMetagegevens=VerwijzingGegevens("technische_beschieden.imro.xml"),
+        gerelateerdInformatieobject=GerelateerdInformatieobjectGegevens(
+            VerwijzingGegevens("Bestemmingsplan Hooigracht"),
+            BegripGegevens(
+                "Refereert aan",
+                VerwijzingGegevens(
+                    "Begrippenlijst Relatietypen (informatieobject) MDTO"
+                ),
+            ),
         ),
     )
 
