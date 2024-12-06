@@ -1,22 +1,27 @@
 import dataclasses
 import hashlib
+import logging
 import os
 import shutil
 import subprocess
-import sys
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, List, TextIO
 
 import lxml.etree as ET
-
-# Make into an optional dependency?
 import validators
 
-# globals
-_force, _quiet = False, False
+# setup logging
+logging.basicConfig(
+    format="[%(asctime)s] %(levelname)s: %(message)s", datefmt="%H:%M:%S"
+)
+logging.addLevelName(
+    # colorize warning messages
+    logging.WARNING, "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.WARNING)
+)
 
+# globals
 MDTO_MAX_NAAM_LENGTH = 80
 
 # Helper methods
@@ -45,37 +50,6 @@ def _process_file(file_or_filename) -> TextIO:
         raise TypeError(
             f"Expected file object or str, but got value of type {type(file_or_filename)}"
         )
-
-
-def _log(m):
-    if _quiet:
-        return
-    else:
-        print(m, file=sys.stderr)
-
-
-def _warn(warning):
-    """Log warning, and exit if force == False"""
-    orange = "\033[33m"
-    esc_end = "\033[0m"
-
-    warning = f"{orange}Warning: {warning} "
-    warning += "Continuing anyway." if _force else "Exiting."
-    warning += esc_end
-
-    _log(warning)
-    if not _force:
-        sys.exit(-1)
-
-
-def _error(error):
-    """Log error and exit"""
-
-    red = "\033[31m"
-    esc_end = "\033[0m"
-
-    _log(f"{red}Error: {error}{esc_end}")
-    sys.exit(-1)
 
 
 class XMLSerializable:
@@ -334,8 +308,7 @@ class RaadpleeglocatieGegevens(XMLSerializable):
         elif isinstance(url, str) and validators.url(url):
             self._raadpleeglocatieOnline = url
         else:
-            _warn(f"URL '{url}' is malformed.")
-            self._raadpleeglocatieOnline = url
+            raise ValueError(f"URL '{url}' is malformed")
 
 
 @dataclass
@@ -387,9 +360,9 @@ class Object(XMLSerializable):
     def __post_init__(self):
         # check if name is of the right length
         if len(self.naam) > MDTO_MAX_NAAM_LENGTH:
-            _warn(
-                f"value '{self.naam}' of element 'naam' "
-                f"exceeds maximum length of {MDTO_MAX_NAAM_LENGTH}."
+            logging.warning(
+                f"value '{self.naam}' of property naam "
+                f"exceeds maximum length of {MDTO_MAX_NAAM_LENGTH}"
             )
 
     def to_xml(self, root: str) -> ET.ElementTree:
@@ -647,8 +620,7 @@ class Bestand(Object, XMLSerializable):
         elif validators.url(url):
             self._URLBestand = url
         else:
-            _warn(f"URL '{url} is malformed.")
-            self._URLBestand = url
+            raise ValueError(f"URL '{url} is malformed")
 
 
 def detect_verwijzing(informatieobject: TextIO) -> VerwijzingGegevens:
@@ -716,8 +688,8 @@ def pronominfo(path: str) -> BegripGegevens:
 
     # check if fido program exists
     if not shutil.which("fido"):
-        _error(
-            "'fido' not found. For installation instructions, "
+        raise RuntimeError(
+            "Program 'fido' not found. For installation instructions, "
             "see https://github.com/openpreserve/fido#installation"
         )
 
@@ -740,16 +712,18 @@ def pronominfo(path: str) -> BegripGegevens:
 
     # fido prints warnings about empty files to stderr
     if "(empty)" in stderr.lower():
-        _warn(f"file {path} appears to be an empty file!")
+        logging.warning(f"file {path} appears to be an empty file")
 
     # check for errors
     if returncode != 0:
-        _warn(f"fido PRONOM detection on file {path} failed with error '{stderr}'.")
+        raise RuntimeError(
+            f"fido PRONOM detection failed on file {path} with error:\n {stderr}"
+        )
     elif stdout.startswith("OK"):
         results = stdout.split("\n")
         if len(results) > 2:  # .split('\n') returns a list of two items
-            _log(
-                "Info: fido returned more than one PRONOM match "
+            logging.warning(
+                "fido returned more than one PRONOM match "
                 f"for file {path}. Selecting the first one."
             )
 
@@ -762,10 +736,7 @@ def pronominfo(path: str) -> BegripGegevens:
             begripBegrippenlijst=verwijzing,
         )
     else:
-        _warn(f"fido failed to detect PRONOM ID of file {path}.")
-
-    # can return None in case PRONOM detection fails and force == True
-    return None
+        raise RuntimeError(f"fido PRONOM detection failed on file {path}")
 
 
 def create_bestand(
