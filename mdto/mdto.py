@@ -788,10 +788,10 @@ def create_bestand(
         informatieobject (TextIO | str): path or file-like object that
             represents an MDTO Informatieobject in XML form.
             Used to infer values for <isRepresentatieVan>.
-        naam (str, optional): value of <naam>. Defaults to the basename of `infile`
-        url (str, optional): value of <URLBestand>
-        quiet (bool, optional): silence non-fatal warnings
-        force (bool, optional): do not exit when encountering would-be invalid tag values
+        naam (Optional[str]): value of <naam>. Defaults to the basename of `infile`
+        url (Optional[str]): value of <URLBestand>
+        quiet (Optional[bool]): silence non-fatal warnings
+        force (Optional[bool]): do not exit when encountering would-be invalid tag values
 
     Example:
         ```python
