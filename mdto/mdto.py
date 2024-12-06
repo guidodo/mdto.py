@@ -435,28 +435,30 @@ class Informatieobject(XMLSerializable, Object):
     ```
 
     Args:
-        identificatie (IdentificatieGegevens | List[IdentificatieGegevens]): Gegevens waarmee het object geïdentificeerd kan worden
-        naam (str): Betekenisvolle aanduiding waaronder het object bekend is
-        archiefvormer (VerwijzingGegevens | List[VerwijzingGegevens]): Organisatie die verantwoordelijk is voor het opmaken en/of ontvangen van het informatieobject
-        beperkingGebruik (BeperkingGebruikGegevens | List[BeperkingGebruikGegevens]): Beperking die gesteld is aan het gebruik van het informatieobject
-        waardering (BegripGegevens): Waardering van het informatieobject volgens een selectielijst
-        aggregatieniveau (BegripGegevens, optional): Aggregatieniveau van het informatieobject
-        classificatie (BegripGegevens, optional): Classificatie van het informatieobject
-        trefwoord (str | List[str], optional): Trefwoord dat het informatieobject beschrijft
-        omschrijving (str, optional): Omschrijving van het informatieobject
-        dekkingInTijd (DekkingInTijdGegevens, optional): Periode waarop het informatieobject betrekking heeft
-        dekkingInRuimte (VerwijzingGegevens, optional): Plaats/locatie waar het informatieobject betrekking op heeft
-        taal (str, optional): Taal waarin het informatieobject gesteld is
-        event (EventGegevens | List[EventGegevens], optional): Gebeurtenis gerelateerd aan het informatieobject
-        bewaartermijn (TermijnGegevens, optional): Termijn waarin het informatieobject bewaard dient te worden
-        informatiecategorie (BegripGegevens, optional): Informatiecategorie uit een selectie- of hotspotlijst waar de bewaartermijn op gebaseerd is
-        bevatOnderdeel (VerwijzingGegevens, optional): Verwijzing naar een ander onderdeel dat deel uitmaakt van het informatieobject
-        isOnderdeelVan (VerwijzingGegevens, optional): Bovenliggende aggregatie waar dit informatieobject onderdeel van is
-        heeftRepresentatie (VerwijzingGegevens, optional): Verwijzing naar het bestand dat een representatie van het informatieobject is
-        aanvullendeMetagegevens (VerwijzingGegevens, optional): Verwijzing naar een bestand dat aanvullende (domeinspecifieke) metagegevens over het informatieobject bevat
-        gerelateerdInformatieobject (GerelateerdInformatieobjectGegevens, optional): Informatie over een gerelateerd informatieobject
-        betrokkene (BetrokkeneGegevens | List[BetrokkeneGegevens], optional): Persoon of organisatie die relevant was binnen het ontstaan en gebruik van het informatieobject
-        activiteit (VerwijzingGegevens, optional): Bedrijfsactiviteit waarbij het informatieobject door de archiefvormer is ontvangen of gemaakt
+        identificatie (IdentificatieGegevens | List[IdentificatieGegevens]): Identificatiekenmerk
+        naam (str): Aanduiding waaronder het object bekend is
+        archiefvormer (VerwijzingGegevens | List[VerwijzingGegevens]): Maker/ontvanger
+        beperkingGebruik (BeperkingGebruikGegevens | List[BeperkingGebruikGegevens]): Beperking op het gebruik
+        waardering (BegripGegevens): Waardering volgens een selectielijst
+        aggregatieniveau (Optional[BegripGegevens]): Aggregatieniveau
+        classificatie (Optional[BegripGegevens]): Classificatie volgens een classificatieschema
+        trefwoord (Optional[str | List[str]]): Trefwoord
+        omschrijving (Optional[str]): Inhoudelijke omschrijving(en)
+        raadpleeglocatie(Optional[RaadpleeglocatieGegevens | List[RaadpleeglocatieGegevens]]): Raadpleeglocatie(s)
+        dekkingInTijd (Optional[DekkingInTijdGegevens]): Periode waar dit object betrekking op heeft
+        dekkingInRuimte (Optional[VerwijzingGegevens]): Plaats/locatie waar dit object betrekking op heeft
+        taal (Optional[str]): Taal waarin het object gesteld is
+        event (Optional[EventGegevens | List[EventGegevens]]): Gerelateerde gebeurtenis
+        bewaartermijn (Optional[TermijnGegevens]): Termijn waarin het object bewaard dient te worden
+        informatiecategorie (Optional[BegripGegevens]): Informatiecategorie waar de bewaartermijn op gebaseerd is
+        bevatOnderdeel (Optional[VerwijzingGegevens]): Direct onderliggend object
+        isOnderdeelVan (Optional[VerwijzingGegevens]): Bovenliggende aggregatie van dit object
+        heeftRepresentatie (Optional[VerwijzingGegevens]): Bestand object dat dit object representeert
+        aanvullendeMetagegevens (Optional[VerwijzingGegevens]): Aanvullende (domeinspecifieke) metagegevens
+        gerelateerdInformatieobject (Optional[GerelateerdInformatieobjectGegevens]): Gerelateerd object
+        betrokkene (Optional[BetrokkeneGegevens | List[BetrokkeneGegevens]]): Persoon/organisatie betrokken bij
+         ontstaan en gebruik van dit object
+        activiteit (Optional[VerwijzingGegevens]): Bedrijfsactiviteit waarbij dit object is ontvangen/gemaakt
     """
 
     archiefvormer: VerwijzingGegevens | List[VerwijzingGegevens]
