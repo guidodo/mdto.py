@@ -191,18 +191,7 @@ class ChecksumGegevens(XMLSerializable):
     checksumDatum: str
 
     def to_xml(self, root: str = "checksum") -> ET.Element:
-        """Transform ChecksumGegevens into XML tree with the following structure:
-
-         ```xml
-         <checksum>
-             <checksumAlgoritme>
-                 …
-             </checksumAlgoritme>
-             <checksumWaarde>…</checksumWaarde>
-             <checksumDatum>…</checksumDatum>
-         </checksum>
-
-         ```
+        """Transform ChecksumGegevens into XML tree.
 
         Returns:
              ET.Element: XML representation of object
