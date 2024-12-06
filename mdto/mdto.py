@@ -1,13 +1,14 @@
+import dataclasses
+import hashlib
 import os
 import shutil
-import sys
 import subprocess
-import hashlib
-from typing import TextIO, List, Any
-from datetime import datetime
+import sys
 from dataclasses import dataclass
-import dataclasses
+from datetime import datetime
 from pathlib import Path
+from typing import Any, List, TextIO
+
 import lxml.etree as ET
 
 # Make into an optional dependency?
