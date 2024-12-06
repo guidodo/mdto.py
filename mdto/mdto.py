@@ -905,7 +905,7 @@ def from_file(xmlfile: str) -> Informatieobject | Bestand:
     # edit the informatie object
     informatieobject.naam = "Verlenen kapvergunning Flipje's Erf 15 Tiel"
 
-    # save it to a new file
+    # save it to a new file (or override the original, if desired)
     informatieobject.save("path/to/new/file.xml")
     ```
 
