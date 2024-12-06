@@ -157,7 +157,7 @@ class VerwijzingGegevens(XMLSerializable):
 
     Args:
         verwijzingNaam (str): Naam van het object waarnaar verwezen wordt
-        verwijzingIdentificatie (IdentificatieGegevens, optional): Identificatie van object waarnaar verwezen wordt
+        verwijzingIdentificatie (Optional[IdentificatieGegevens]): Identificatie van object waarnaar verwezen wordt
     """
 
     verwijzingNaam: str
@@ -171,7 +171,7 @@ class BegripGegevens(XMLSerializable):
     Args:
         begripLabel (str): De tekstweergave van het begrip dat is toegekend in de begrippenlijst
         begripBegrippenlijst (VerwijzingGegevens): Verwijzing naar een beschrijving van de begrippen
-        begripCode (str, optional): De code die aan het begrip is toegekend in de begrippenlijst
+        begripCode (Optional[str]): De code die aan het begrip is toegekend in de begrippenlijst
     """
 
     begripLabel: str
@@ -190,10 +190,10 @@ class TermijnGegevens(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/termijnGegevens
 
     Args:
-        termijnTriggerStartLooptijd (BegripGegevens, optional): Gebeurtenis waarna de looptijd van de termijn start
-        termijnStartdatumLooptijd (str, optional): Datum waarop de looptijd is gestart
-        termijnLooptijd (str, optional): Hoeveelheid tijd waarin de termijnEindDatum bereikt wordt
-        termijnEinddatum (str, optional): Datum waarop de termijn eindigt
+        termijnTriggerStartLooptijd (Optional[BegripGegevens]): Gebeurtenis waarna de looptijd van de termijn start
+        termijnStartdatumLooptijd (Optional[str]): Datum waarop de looptijd is gestart
+        termijnLooptijd (Optional[str]): Hoeveelheid tijd waarin de termijnEindDatum bereikt wordt
+        termijnEinddatum (Optional[str]): Datum waarop de termijn eindigt
     """
 
     termijnTriggerStartLooptijd: BegripGegevens = None
@@ -241,9 +241,9 @@ class BeperkingGebruikGegevens(XMLSerializable):
 
     Args:
         beperkingGebruikType (BegripGegevens): Typering van de beperking
-        beperkingGebruikNadereBeschrijving (str, optional): Beschrijving van de beperking
-        beperkingGebruikDocumentatie (VerwijzingGegevens, optional): Verwijzing naar een beschrijving van de beperking
-        beperkingGebruikTermijn (TermijnGegevens, optional): Termijn waarbinnen de beperking van toepassing is
+        beperkingGebruikNadereBeschrijving (Optional[str]): Beschrijving van de beperking
+        beperkingGebruikDocumentatie (Optional[VerwijzingGegevens]): Verwijzing naar een beschrijving van de beperking
+        beperkingGebruikTermijn (Optional[TermijnGegevens]): Termijn waarbinnen de beperking van toepassing is
     """
 
     beperkingGebruikType: BegripGegevens
@@ -267,7 +267,7 @@ class DekkingInTijdGegevens(XMLSerializable):
     Args:
         dekkingInTijdType (BegripGegevens): Typering van de periode waar het informatieobject betrekking op heeft
         dekkingInTijdBegindatum (str): Begindatum van de periode waar het informatieobject betrekking op heeft
-        dekkingInTijdEinddatum (str, optional): Einddatum van de periode waar het informatieobject betrekking op heeft
+        dekkingInTijdEinddatum (Optional[str]): Einddatum van de periode waar het informatieobject betrekking op heeft
     """
 
     dekkingInTijdType: BegripGegevens
@@ -284,9 +284,9 @@ class EventGegevens(XMLSerializable):
 
     Args:
         eventType (BegripGegevens): Aanduiding van het type event
-        eventTijd (str, optional): Tijdstip waarop het event heeft plaatsgevonden
-        eventVerantwoordelijkeActor (VerwijzingGegevens, optional): Actor die verantwoordelijk was voor het event
-        eventResultaat (str, optional): Beschrijving van het resultaat van het event
+        eventTijd (Optional[str]): Tijdstip waarop het event heeft plaatsgevonden
+        eventVerantwoordelijkeActor (Optional[VerwijzingGegevens]): Actor die verantwoordelijk was voor het event
+        eventResultaat (Optional[str]): Beschrijving van het resultaat van het event
     """
 
     eventType: BegripGegevens
@@ -303,12 +303,12 @@ class RaadpleeglocatieGegevens(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/raadpleeglocatie
 
     Args:
-        raadpleeglocatieFysiek (VerwijzingGegevens, optional): Fysieke raadpleeglocatie van het informatieobject
-        raadpleeglocatieOnline (str, optional): Online raadpleeglocatie van het informatieobject; moet een valide URL zijn
+        raadpleeglocatieFysiek (Optional[VerwijzingGegevens])): Fysieke raadpleeglocatie van het informatieobject
+        raadpleeglocatieOnline (Optional[str]): Online raadpleeglocatie van het informatieobject; moet een valide URL zijn
     """
 
-    raadpleeglocatieFysiek: VerwijzingGegevens = None
-    raadpleeglocatieOnline: str = None
+    raadpleeglocatieFysiek: VerwijzingGegevens | List[VerwijzingGegevens] = None
+    raadpleeglocatieOnline: str | List[VerwijzingGegevens] = None
 
     def to_xml(self, root: str = "raadpleeglocatie"):
         return super().to_xml(root)
@@ -445,7 +445,7 @@ class Object(XMLSerializable):
             file_or_filename (str | TextIO): Path or file-object to write the object's XML representation to.
               If passing a file-like object, the file must be opened
               in writeable binary mode (i.e. `wb`).
-            lxml_args (dict, optional): Extra keyword arguments to pass to lxml's write() method.
+            lxml_args (Optional[dict]): Extra keyword arguments to pass to lxml's write() method.
               Defaults to `xml_declaration=True, pretty_print=True, encoding="UTF-8"`.
 
         Note:
@@ -478,42 +478,43 @@ class Informatieobject(Object, XMLSerializable):
         beperkingGebruik (BeperkingGebruikGegevens | List[BeperkingGebruikGegevens]): Beperking op het gebruik
         waardering (BegripGegevens): Waardering volgens een selectielijst
         aggregatieniveau (Optional[BegripGegevens]): Aggregatieniveau
-        classificatie (Optional[BegripGegevens]): Classificatie volgens een classificatieschema
+        classificatie (Optional[BegripGegevens | List[BegripGegevens]]): Classificatie volgens een classificatieschema
         trefwoord (Optional[str | List[str]]): Trefwoord
-        omschrijving (Optional[str]): Inhoudelijke omschrijving(en)
-        raadpleeglocatie(Optional[RaadpleeglocatieGegevens | List[RaadpleeglocatieGegevens]]): Raadpleeglocatie(s)
-        dekkingInTijd (Optional[DekkingInTijdGegevens]): Periode waar dit object betrekking op heeft
-        dekkingInRuimte (Optional[VerwijzingGegevens]): Plaats/locatie waar dit object betrekking op heeft
-        taal (Optional[str]): Taal waarin het object gesteld is
+        omschrijving (Optional[str | List[str]]): Inhoudelijke omschrijving
+        raadpleeglocatie(Optional[RaadpleeglocatieGegevens | List[RaadpleeglocatieGegevens]]): Raadpleeglocatie
+        dekkingInTijd (Optional[DekkingInTijdGegevens | List[DekkingInTijdGegevens]]): Betreffende periode/tijdstip
+        dekkingInRuimte (Optional[VerwijzingGegevens | List[VerwijzingGegevens]]): Betreffende plaats/locatie
+        taal (Optional[str]): Taal van het object
         event (Optional[EventGegevens | List[EventGegevens]]): Gerelateerde gebeurtenis
         bewaartermijn (Optional[TermijnGegevens]): Termijn waarin het object bewaard dient te worden
         informatiecategorie (Optional[BegripGegevens]): Informatiecategorie waar de bewaartermijn op gebaseerd is
-        bevatOnderdeel (Optional[VerwijzingGegevens]): Direct onderliggend object
-        isOnderdeelVan (Optional[VerwijzingGegevens]): Bovenliggende aggregatie van dit object
-        heeftRepresentatie (Optional[VerwijzingGegevens]): Bestand object dat dit object representeert
-        aanvullendeMetagegevens (Optional[VerwijzingGegevens]): Aanvullende (domeinspecifieke) metagegevens
-        gerelateerdInformatieobject (Optional[GerelateerdInformatieobjectGegevens]): Gerelateerd object
+        isOnderdeelVan (Optional[VerwijzingGegevens | List[VerwijzingGegevens]]): Bovenliggende aggregatie
+        bevatOnderdeel (Optional[VerwijzingGegevens | List[VerwijzingGegevens]]): Direct onderliggend object
+        heeftRepresentatie (Optional[VerwijzingGegevens | List[VerwijzingGegevens]]): Bijbehorend Bestand object
+        aanvullendeMetagegevens (Optional[VerwijzingGegevens | List[VerwijzingGegevens]]): Aanvullende metagegevens
+        gerelateerdInformatieobject (Optional[GerelateerdInformatieobjectGegevens | List[GerelateerdInformatieobjectGegevens]]): Gerelateerd object
         betrokkene (Optional[BetrokkeneGegevens | List[BetrokkeneGegevens]]): Persoon/organisatie betrokken bij
           ontstaan en gebruik van dit object
-        activiteit (Optional[VerwijzingGegevens]): Bedrijfsactiviteit waarbij dit object is ontvangen/gemaakt
+        activiteit (Optional[VerwijzingGegevens | List[VerwijzingGegevens]]): Activiteit waarbij dit object
+          is gemaakt/ontvangen
     """
 
     archiefvormer: VerwijzingGegevens | List[VerwijzingGegevens]
     beperkingGebruik: BeperkingGebruikGegevens | List[BeperkingGebruikGegevens]
     waardering: BegripGegevens
     aggregatieniveau: BegripGegevens = None
-    classificatie: BegripGegevens = None
+    classificatie: BegripGegevens | List[BegripGegevens] = None
     trefwoord: str | List[str] = None
     omschrijving: str = None
-    raadpleeglocatie: RaadpleeglocatieGegevens = None
-    dekkingInTijd: DekkingInTijdGegevens = None
-    dekkingInRuimte: VerwijzingGegevens = None
+    raadpleeglocatie: RaadpleeglocatieGegevens | List[RaadpleeglocatieGegevens] = None
+    dekkingInTijd: DekkingInTijdGegevens | List[DekkingInTijdGegevens] = None
+    dekkingInRuimte: VerwijzingGegevens | List[VerwijzingGegevens] = None
     taal: str = None
     event: EventGegevens | List[EventGegevens] = None
     bewaartermijn: TermijnGegevens = None
     informatiecategorie: BegripGegevens = None
+    isOnderdeelVan: VerwijzingGegevens | List[VerwijzingGegevens] = None
     bevatOnderdeel: VerwijzingGegevens | List[VerwijzingGegevens] = None
-    isOnderdeelVan: VerwijzingGegevens = None
     heeftRepresentatie: VerwijzingGegevens = None
     aanvullendeMetagegevens: VerwijzingGegevens | List[VerwijzingGegevens] = None
     gerelateerdInformatieobject: GerelateerdInformatieobjectGegevens = None
@@ -584,13 +585,13 @@ class Bestand(Object, XMLSerializable):
         `create_bestand()` convenience function instead.
 
     Args:
-        identificatie (IdentificatieGegevens): Identificatiekenmerk
+        identificatie (IdentificatieGegevens | List[IdentificatieGegevens]): Identificatiekenmerk
         naam (str): Aanduiding waaronder dit object bekend is (meestal bestandsnaam)
         omvang (int): Aantal bytes in het bestand
         bestandsformaat (BegripGegevens): Bestandsformaat, bijv. PRONOM of MIME-type informatie
         checksum (ChecksumGegevens): Checksum gegevens van het bestand
         isRepresentatieVan (VerwijzingGegevens): Object waarvan dit bestand een representatie is
-        URLBestand (str, optional): Actuele verwijzing naar dit bestand als RFC 3986 conforme URI
+        URLBestand (Optional[str]): Actuele verwijzing naar dit bestand als RFC 3986 conforme URI
     """
 
     omvang: int
@@ -862,7 +863,7 @@ def create_checksum(
 
     Args:
         infile (TextIO | str): file-like object to generate checksum data for
-        algorithm (str, optional): checksum algorithm to use; defaults to sha256.
+        algorithm (Optional[str]): checksum algorithm to use; defaults to sha256.
          For valid values, see https://docs.python.org/3/library/hashlib.html
 
     Returns:
