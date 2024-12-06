@@ -1042,6 +1042,6 @@ def from_file(mdto_xml: TextIO | str) -> Object:
         return parse_bestand(children)
     else:
         raise ValueError(
-            f"Unexpected first child <{object_type}> in <MDTO>: "
+            f"Unexpected first child <{object_type}> in {mdto_xml}: "
             "expected <informatieobject> or <bestand>."
         )
