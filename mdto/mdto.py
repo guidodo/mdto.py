@@ -623,7 +623,7 @@ class Bestand(Object, XMLSerializable):
             raise ValueError(f"URL '{url} is malformed")
 
 
-def detect_verwijzing(informatieobject: TextIO) -> VerwijzingGegevens:
+def detect_verwijzing(informatieobject: TextIO | str) -> VerwijzingGegevens:
     """A Bestand object must contain a reference to a corresponding informatieobject.
     Specifically, it expects an <isRepresentatieVan> tag with the following children:
 
@@ -635,7 +635,7 @@ def detect_verwijzing(informatieobject: TextIO) -> VerwijzingGegevens:
     parsing the XML of the file `informatieobject`.
 
     Args:
-        informatieobject (TextIO): XML file to infer VerwijzingGegevens from
+        informatieobject (TextIO | str): XML file to infer VerwijzingGegevens from
 
     Returns:
         `VerwijzingGegevens`, refering to the informatieobject specified by `informatieobject`
@@ -648,20 +648,19 @@ def detect_verwijzing(informatieobject: TextIO) -> VerwijzingGegevens:
 
     id_xpath = ".//mdto:informatieobject/mdto:identificatie/"
 
-    kenmerk = root.find(id_xpath + "mdto:identificatieKenmerk", namespaces=namespaces)
-    bron = root.find(id_xpath + "mdto:identificatieBron", namespaces=namespaces)
+    kenmerk = root.find(f"{id_xpath}mdto:identificatieKenmerk", namespaces=namespaces)
+    bron = root.find(f"{id_xpath}mdto:identificatieBron", namespaces=namespaces)
     naam = root.find(".//mdto:informatieobject/mdto:naam", namespaces=namespaces)
 
-    # bool(ET.Element) == False, according to the docs
-    # So use ¬p and ¬q == ¬(p or q)
-    if not (kenmerk is None or bron is None):
-        id_gegevens = IdentificatieGegevens(kenmerk.text, bron.text)
+    if None in [kenmerk, bron]:
+        raise ValueError(f"Failed to detect <identificatie> in {informatieobject}")
 
-    # FIXME: this should be an unrecoverable error
+    identificatie = IdentificatieGegevens(kenmerk.text, bron.text)
+
     if naam is None:
-        _error(f"informatieobject in {informatieobject} " "lacks a <naam> tag.")
-    else:
-        return VerwijzingGegevens(naam.text, id_gegevens)
+        raise ValueError(f"Failed to detect <naam> in {informatieobject}")
+
+    return VerwijzingGegevens(naam.text, identificatie)
 
 
 def pronominfo(path: str) -> BegripGegevens:
