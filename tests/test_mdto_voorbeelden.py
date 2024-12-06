@@ -95,3 +95,34 @@ def test_serialization_chain_bestand(voorbeeld_bestand_xml):
 
     # Ensure the serialized XML matches the original
     assert output_xml == original_xml
+
+
+def test_file_saving(voorbeeld_archiefstuk_xml, tmp_path_factory):
+    """Test if `save()` produces byte-for-byte equivalent XML from archiefstuk example"""
+    informatieobject = from_file(voorbeeld_archiefstuk_xml)
+
+    # location to write to
+    tmpdir = tmp_path_factory.mktemp("Output")
+    outfile = tmpdir / "test archiefstuk.xml"
+
+    informatieobject.save(outfile)
+
+    # MDTO uses CRLF (DOS) line endings. Convert them to UNIX line endings.
+    # FIXME: this is probably not needed on *dos systems?
+    with open(voorbeeld_archiefstuk_xml, "rb") as f:
+        # Example files also contain newlines at the end of files, so add this
+        voorbeeld_archiefstuk_xml_lf_endings = b"\n".join(f.read().splitlines()) + b"\n"
+
+    # Read contents of saved file
+    with open(outfile, "rb") as f:
+        outfile_bytes = f.read()
+
+    # MDTO use double qoutes in the xml declaration, whereas lxml uses single quotes. Both are valid.
+    # (couldn't find an easy way to change lxml's behavior here, unfortunately)
+    outfile_bytes = outfile_bytes.replace(
+        b"<?xml version='1.0' encoding='UTF-8'?>",
+        b'<?xml version="1.0" encoding="UTF-8"?>',
+    )
+
+    # Ensure the written file matches the original
+    assert voorbeeld_archiefstuk_xml_lf_endings == outfile_bytes
