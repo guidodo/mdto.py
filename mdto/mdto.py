@@ -488,7 +488,7 @@ class Object:
     """https://www.nationaalarchief.nl/archiveren/mdto/object
 
     This class serves as the parent class to Informatieobject and Bestand.
-    Hence, there is generally little reason to use it directly.
+    There is no reason to use it directly.
 
     MDTO objects that derive from this class inherit a save() method, which can be used
     to write an Informatieobject/Bestand to a XML file.
