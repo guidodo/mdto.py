@@ -5,7 +5,7 @@
 `mdto.py` is een python library die helpt bij het aanmaken, aanpassen, en controleren van [MDTO XML](https://www.nationaalarchief.nl/archiveren/mdto/xml-schema) bestanden. Denk bijvoorbeeld aan het automatisch genereren van technische metagegevens, of wat in MDTO het objectsoort [Bestand](https://www.nationaalarchief.nl/archiveren/mdto/metagegevensschema#collapse-102796) wordt genoemd:
 
 ``` xml
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <MDTO xmlns="https://www.nationaalarchief.nl/mdto" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://www.nationaalarchief.nl/mdto https://www.nationaalarchief.nl/mdto/MDTO-XML1.0.1.xsd">
     <bestand>
         <identificatie>
