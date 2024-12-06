@@ -494,7 +494,7 @@ class Informatieobject(Object, XMLSerializable):
         aanvullendeMetagegevens (Optional[VerwijzingGegevens]): Aanvullende (domeinspecifieke) metagegevens
         gerelateerdInformatieobject (Optional[GerelateerdInformatieobjectGegevens]): Gerelateerd object
         betrokkene (Optional[BetrokkeneGegevens | List[BetrokkeneGegevens]]): Persoon/organisatie betrokken bij
-         ontstaan en gebruik van dit object
+          ontstaan en gebruik van dit object
         activiteit (Optional[VerwijzingGegevens]): Bedrijfsactiviteit waarbij dit object is ontvangen/gemaakt
     """
 
