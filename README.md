@@ -176,7 +176,7 @@ from pathlib import Path
 
 
 # itereer door alle Bestand XMLs:
-for bestand_path in Path('.').rglob('*.bestand.mdto.xml'):
+for bestand_path in Path(".").rglob("*.bestand.mdto.xml"):
     bestand = mdto.from_file(bestand_path)
 
     # vind naam + path van het te updaten bestand
