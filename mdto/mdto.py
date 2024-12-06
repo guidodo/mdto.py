@@ -837,8 +837,7 @@ def create_checksum(
     return ChecksumGegevens(checksumAlgoritme, checksumWaarde, checksumDatum)
 
 
-# Q: should this also accept file objects?
-def from_file(xmlfile: str) -> Object:
+def from_file(mdto_xml: TextIO | str) -> Object:
     """Construct a Informatieobject/Bestand object from a MDTO XML file.
 
     Note:
@@ -859,10 +858,10 @@ def from_file(xmlfile: str) -> Object:
     ```
 
     Args:
-        filename (str): The MDTO XML file to construct an Informatieobject/Bestand from
+        mdto_xml (TextIO | str): The MDTO XML file to construct an Informatieobject/Bestand from
 
     Returns:
-        Informatieobject | Bestand: A new MDTO object
+        Object: A new MDTO object (Bestand or Informatieobject)
     """
 
     # Parsers:
@@ -1030,7 +1029,7 @@ def from_file(xmlfile: str) -> Object:
     parse_bestand = lambda e: elem_to_mdto(e, Bestand, bestand_parsers)
 
     # read xmlfile
-    tree = ET.parse(xmlfile)
+    tree = ET.parse(mdto_xml)
     root = tree.getroot()
     children = list(root[0])
 
