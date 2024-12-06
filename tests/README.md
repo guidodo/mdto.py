@@ -12,8 +12,8 @@ Deze tests valideren de werking van deze library door naar drie dingen te kijken
 # Het uitvoeren van de tests
 
 ``` shellsession
-$ cd projecten/mdto # move into project dir
-$ paru -S pytest # adapt to your operating system/preferences
+$ cd projecten/mdto # ga naar de map van dit project
+$ paru -S pytest # pas aan naar je bestuuringssysteem/voorkeuren
 $ pip install -e . # installeer mdto.py in "editable" modus, zodat je je "globale" module lokaal kunt editen
 $ pytest
 ```
