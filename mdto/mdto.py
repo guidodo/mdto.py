@@ -515,11 +515,13 @@ class Informatieobject(Object, XMLSerializable):
     informatiecategorie: BegripGegevens = None
     isOnderdeelVan: VerwijzingGegevens | List[VerwijzingGegevens] = None
     bevatOnderdeel: VerwijzingGegevens | List[VerwijzingGegevens] = None
-    heeftRepresentatie: VerwijzingGegevens = None
+    heeftRepresentatie: VerwijzingGegevens | List[VerwijzingGegevens] = None
     aanvullendeMetagegevens: VerwijzingGegevens | List[VerwijzingGegevens] = None
-    gerelateerdInformatieobject: GerelateerdInformatieobjectGegevens = None
+    gerelateerdInformatieobject: (
+        GerelateerdInformatieobjectGegevens | List[GerelateerdInformatieobjectGegevens]
+    ) = None
     betrokkene: BetrokkeneGegevens | List[BetrokkeneGegevens] = None
-    activiteit: VerwijzingGegevens = None
+    activiteit: VerwijzingGegevens | List[VerwijzingGegevens] = None
 
     def _mdto_ordered_fields(self) -> List:
         """Sort dataclass fields by their order in the MDTO XSD."""
