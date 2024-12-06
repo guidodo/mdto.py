@@ -370,7 +370,7 @@ class BetrokkeneGegevens(XMLSerializable):
 
 
 @dataclass
-class Object:
+class Object(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/object
 
     This class serves as the parent class to Informatieobject and Bestand.
@@ -390,6 +390,45 @@ class Object:
                 f"value '{self.naam}' of element 'naam' "
                 f"exceeds maximum length of {MAX_NAAM_LENGTH}."
             )
+
+    def to_xml(self, root: str) -> ET.ElementTree:
+        """Transform Object into an XML tree with the following structure:
+
+        ```xml
+        <MDTO xmlns=…>
+            <root> <!-- e.g. bestand -->
+                …
+            </root>
+        </MDTO>
+        ```
+        Returns:
+            ET.ElementTree: XML tree representing the Object
+        """
+
+        # construct attributes of <MDTO>
+        xsi_ns = "http://www.w3.org/2001/XMLSchema-instance"
+        nsmap = {
+            None: "https://www.nationaalarchief.nl/mdto",  # default namespace (i.e. xmlns=https...)
+            "xsi": xsi_ns,
+        }
+
+        # create <MDTO>
+        mdto = ET.Element("MDTO", nsmap=nsmap)
+
+        # set schemaLocation attribute of <MDTO>
+        mdto.set(
+            f"{{{xsi_ns}}}schemaLocation",
+            "https://www.nationaalarchief.nl/mdto https://www.nationaalarchief.nl/mdto/MDTO-XML1.0.1.xsd",
+        )
+
+        # convert all dataclass fields to their XML representation
+        children = super().to_xml(root)
+        mdto.append(children)
+
+        tree = ET.ElementTree(mdto)
+        # use tabs as indentation (this matches what MDTO does)
+        ET.indent(tree, space="\t")
+        return tree
 
     def save(
         self,
@@ -420,7 +459,7 @@ class Object:
 
 # TODO: place more restrictions on taal?
 @dataclass
-class Informatieobject(XMLSerializable, Object):
+class Informatieobject(Object, XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/informatieobject
 
     Example:
@@ -533,35 +572,11 @@ class Informatieobject(XMLSerializable, Object):
         Returns:
             ET.ElementTree: XML tree representing the Informatieobject object
         """
-
-        # construct attributes of <MDTO>
-        xsi_ns = "http://www.w3.org/2001/XMLSchema-instance"
-        nsmap = {
-            None: "https://www.nationaalarchief.nl/mdto",  # default namespace (i.e. xmlns=https...)
-            "xsi": xsi_ns,
-        }
-
-        # create <MDTO>
-        mdto = ET.Element("MDTO", nsmap=nsmap)
-
-        # set schemaLocation attribute of <MDTO>
-        mdto.set(
-            f"{{{xsi_ns}}}schemaLocation",
-            "https://www.nationaalarchief.nl/mdto https://www.nationaalarchief.nl/mdto/MDTO-XML1.0.1.xsd",
-        )
-
-        # convert all dataclass fields to their XML representation
-        children = super().to_xml("informatieobject")
-        mdto.append(children)
-
-        tree = ET.ElementTree(mdto)
-        # use tabs as indentation (this matches what MDTO does)
-        ET.indent(tree, space="\t")
-        return tree
+        return super().to_xml("informatieobject")
 
 
 @dataclass
-class Bestand(XMLSerializable, Object):
+class Bestand(Object, XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/bestand
 
     Note:
@@ -608,32 +623,7 @@ class Bestand(XMLSerializable, Object):
         Returns:
             ET.ElementTree: XML tree representing Bestand object
         """
-
-        # construct attributes of <MDTO>
-        xsi_ns = "http://www.w3.org/2001/XMLSchema-instance"
-        nsmap = {
-            None: "https://www.nationaalarchief.nl/mdto",  # default namespace (i.e. xmlns=https...)
-            "xsi": xsi_ns,
-        }
-
-        # create <MDTO>
-        mdto = ET.Element("MDTO", nsmap=nsmap)
-
-        # set schemaLocation attribute of <MDTO>
-        mdto.set(
-            f"{{{xsi_ns}}}schemaLocation",
-            "https://www.nationaalarchief.nl/mdto https://www.nationaalarchief.nl/mdto/MDTO-XML1.0.1.xsd",
-        )
-
-        # convert all dataclass fields to their XML representation
-        children = super().to_xml("bestand")
-        mdto.append(children)
-
-        # use tabs as indentation (this matches what MDTO does)
-        tree = ET.ElementTree(mdto)
-        ET.indent(tree, space="\t")
-
-        return tree
+        return super().to_xml("bestand")
 
     @property
     def URLBestand(self):
