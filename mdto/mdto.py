@@ -394,7 +394,11 @@ class Object:
     def save(
         self,
         file_or_filename: str | TextIO,
-        **kwargs,
+        lxml_args: dict = {
+            "xml_declaration": True,
+            "pretty_print": True,
+            "encoding": "UTF-8",
+        },
     ) -> None:
         """Save object to an XML file.
 
@@ -402,22 +406,16 @@ class Object:
             file_or_filename (str | TextIO): Path or file-object to write the object's XML representation to.
               If passing a file-like object, the file must be opened
               in writeable binary mode (i.e. `wb`).
-            kwargs (dict, optional): Extra keyword arguments to pass to lxml's write() method.
+            lxml_args (dict, optional): Extra keyword arguments to pass to lxml's write() method.
               Defaults to `xml_declaration=True, pretty_print=True, encoding="UTF-8"`.
 
         Note:
             For a complete list of options for lxml's write method, see
             https://lxml.de/apidoc/lxml.etree.html#lxml.etree._ElementTree.write
         """
-        default_kwargs = {
-            "xml_declaration": True,
-            "pretty_print": True,
-            "encoding": "UTF-8",
-        }
-        kwargs = {**default_kwargs, **kwargs}  # merge default with function args
 
         xml = self.to_xml()
-        xml.write(file_or_filename, **kwargs)
+        xml.write(file_or_filename, **lxml_args)
 
 
 # TODO: place more restrictions on taal?
