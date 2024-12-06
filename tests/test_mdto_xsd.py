@@ -6,6 +6,7 @@ from mdto import (
     IdentificatieGegevens,
     VerwijzingGegevens,
     BeperkingGebruikGegevens,
+    DekkingInTijdGegevens,
     BegripGegevens,
     create_bestand,
 )
@@ -23,6 +24,11 @@ def test_informatieobject_xml_validity(mdto_xsd):
         beperkingGebruik=BeperkingGebruikGegevens(
             BegripGegevens("nvt", VerwijzingGegevens("geen"))
         ),
+        dekkingInTijd=DekkingInTijdGegevens(
+            BegripGegevens("Looptijd dossier", VerwijzingGegevens("Begrippenlijst Events en Periode's Corsa")),
+            dekkingInTijdBegindatum="1999",
+            dekkingInTijdEinddatum="2005",
+        ),
         waardering=BegripGegevens(
             "V", VerwijzingGegevens("Begrippenlijst Waarderingen MDTO")
         ),
@@ -36,6 +42,7 @@ def test_informatieobject_xml_validity(mdto_xsd):
     informatieobject_xml = ET.fromstring(ET.tostring(informatieobject.to_xml()))
 
     # validate against schema
+    # change to assertValid to see more detailed errors
     assert mdto_schema.validate(informatieobject_xml)
 
 
