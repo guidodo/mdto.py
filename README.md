@@ -181,7 +181,7 @@ for bestand_path in Path(".").rglob("*.bestand.mdto.xml"):
 
     # vind naam + path van het te updaten bestand
     filename = bestand.naam  # in de regel bevat <naam> de bestandsnaam
-    filepath = str(bestand_path.parent / filename)
+    filepath = bestand_path.parent / filename
 
     # maak een nieuwe checksum
     bestand.checksum = mdto.create_checksum(filepath)
