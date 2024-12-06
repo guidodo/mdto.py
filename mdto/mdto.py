@@ -568,8 +568,6 @@ class Informatieobject(Object):
         activiteit (VerwijzingGegevens, optional): Bedrijfsactiviteit waarbij het informatieobject door de archiefvormer is ontvangen of gemaakt
     """
 
-    identificatie: IdentificatieGegevens | List[IdentificatieGegevens]
-    naam: str
     archiefvormer: VerwijzingGegevens | List[VerwijzingGegevens]
     beperkingGebruik: BeperkingGebruikGegevens | List[BeperkingGebruikGegevens]
     waardering: BegripGegevens
@@ -753,8 +751,6 @@ class Bestand(Object):
         URLBestand (str, optional): Actuele verwijzing naar het bestand in de vorm van een RFC 3986 conforme URI
     """
 
-    identificatie: IdentificatieGegevens | List[IdentificatieGegevens]
-    naam: str
     omvang: int
     bestandsformaat: BegripGegevens
     checksum: ChecksumGegevens | List[ChecksumGegevens]
