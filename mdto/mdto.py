@@ -102,7 +102,7 @@ class XMLSerializable:
             ET.Element: XML representation of object new root tag
         """
         root_elem = ET.Element(root)
-        # get fields in the order required in the MDTO XSD
+        # get dataclass fields, but in the order required in the MDTO XSD
         fields = self._mdto_ordered_fields()
 
         # TODO: add a call to yet-to-be-implemented .validate() method here
