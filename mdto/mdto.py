@@ -3,9 +3,10 @@ import shutil
 import sys
 import subprocess
 import hashlib
-from typing import TextIO, List
+from typing import TextIO, List, Any
 from datetime import datetime
 from dataclasses import dataclass
+import dataclasses
 from pathlib import Path
 import lxml.etree as ET
 
@@ -76,8 +77,69 @@ def _error(error):
     sys.exit(-1)
 
 
+class XMLSerializable:
+    """Provides a to_xml() method for converting MDTO dataclasses to XML."""
+
+    def _mdto_ordered_fields(self) -> List:
+        """Sort dataclass fields by their order in the MDTO XSD.
+
+        This method should be overridden when the order of fields in
+        a dataclass does not match the order required by the MDTO XSD.
+
+        Such mismatches occur because Python only allows optional arguments
+        at the _end_ of a function's signature, while MDTO allows optional
+        attributes to appear anywhere.
+        """
+        return dataclasses.fields(self)
+
+    def to_xml(self, root: str) -> ET.Element:
+        """Transform dataclass to XML tree.
+
+        Args:
+            root (str): name of the new root tag
+
+        Returns:
+            ET.Element: XML representation of object new root tag
+        """
+        root_elem = ET.Element(root)
+        # get fields in the order required in the MDTO XSD
+        fields = self._mdto_ordered_fields()
+
+        # TODO: add a call to yet-to-be-implemented .validate() method here
+        # This call will raise an error if the value(s) of field a in a dataclass are not of the right type
+
+        # process all fields in dataclass
+        for field in fields:
+            field_name = field.name
+            field_value = getattr(self, field_name)
+            self._process_dataclass_field(root_elem, field_name, field_value)
+
+        return root_elem
+
+    def _process_dataclass_field(
+        self, root_elem: ET.Element, field_name: str, field_value: Any
+    ):
+        """Recursively process a dataclass field, and append its XML representation to `root_elem`."""
+
+        if field_value is None:
+            # skip fields with no value
+            return
+        elif isinstance(field_value, (list, tuple, set)):
+            # serialize all *Gegevens objects in a sequence
+            for mdto_gegevens in field_value:
+                root_elem.append(mdto_gegevens.to_xml(field_name))
+        elif isinstance(field_value, XMLSerializable):
+            # serialize *Gegevens object
+            root_elem.append(field_value.to_xml(field_name))
+        else:
+            # serialize primitive
+            new_elem = ET.SubElement(root_elem, field_name)
+            # XML serialization can only happen on string values
+            new_elem.text = str(field_value)
+
+
 @dataclass
-class IdentificatieGegevens:
+class IdentificatieGegevens(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/identificatieGegevens
 
     Args:
@@ -88,29 +150,9 @@ class IdentificatieGegevens:
     identificatieKenmerk: str
     identificatieBron: str
 
-    def to_xml(self, root: str) -> ET.Element:
-        """Transform IdentificatieGegevens into XML tree.
-
-        Args:
-            root (str): name of the new root tag
-
-        Returns:
-            ET.Element: XML representation of IdentificatieGegevens with new root tag
-        """
-
-        root = ET.Element(root)
-
-        kenmerk = ET.SubElement(root, "identificatieKenmerk")
-        kenmerk.text = self.identificatieKenmerk
-
-        bron = ET.SubElement(root, "identificatieBron")
-        bron.text = self.identificatieBron
-
-        return root
-
 
 @dataclass
-class VerwijzingGegevens:
+class VerwijzingGegevens(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/verwijzingsGegevens
 
     Args:
@@ -121,31 +163,9 @@ class VerwijzingGegevens:
     verwijzingNaam: str
     verwijzingIdentificatie: IdentificatieGegevens = None
 
-    def to_xml(self, root: str) -> ET.Element:
-        """Transform VerwijzingGegevens into XML tree.
-
-        Args:
-            root (str): name of the new root tag
-
-        Returns:
-            ET.Element: XML representation of VerwijzingGegevens with new root tag
-        """
-
-        root = ET.Element(root)
-
-        verwijzingnaam = ET.SubElement(root, "verwijzingNaam")
-        verwijzingnaam.text = self.verwijzingNaam
-
-        if self.verwijzingIdentificatie:
-            # append lxml element directly to tree,
-            # and set name of the root element to 'verwijzingIdentificatie'
-            root.append(self.verwijzingIdentificatie.to_xml("verwijzingIdentificatie"))
-
-        return root
-
 
 @dataclass
-class BegripGegevens:
+class BegripGegevens(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/begripGegevens
 
     Args:
@@ -158,32 +178,15 @@ class BegripGegevens:
     begripBegrippenlijst: VerwijzingGegevens
     begripCode: str = None
 
-    def to_xml(self, root: str) -> ET.Element:
-        """Transform BegripGegevens into XML tree.
-
-        Args:
-            root (str): name of the new root tag
-
-        Returns:
-            ET.Element: XML representation of BegripGegevens with new root tag
-        """
-
-        root = ET.Element(root)
-
-        begriplabel = ET.SubElement(root, "begripLabel")
-        begriplabel.text = self.begripLabel
-
-        if self.begripCode:
-            begripcode = ET.SubElement(root, "begripCode")
-            begripcode.text = self.begripCode
-
-        root.append(self.begripBegrippenlijst.to_xml("begripBegrippenlijst"))
-
-        return root
+    def _mdto_ordered_fields(self) -> List:
+        """Sort dataclass fields by their order in the MDTO XSD."""
+        fields = super()._mdto_ordered_fields()
+        # swap order of begripBegrippenlijst and begripcode
+        return fields[:-2] + (fields[2], fields[1])
 
 
 @dataclass
-class TermijnGegevens:
+class TermijnGegevens(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/termijnGegevens
 
     Args:
@@ -198,39 +201,9 @@ class TermijnGegevens:
     termijnLooptijd: str = None
     termijnEinddatum: str = None
 
-    def to_xml(self, root: str) -> ET.Element:
-        """Transform TermijnGegevens into XML tree.
-
-        Args:
-            root (str): name of the new root tag
-
-        Returns:
-            ET.Element: XML representation of TermijnGegevens with new root tag
-        """
-        root = ET.Element(root)
-
-        if self.termijnTriggerStartLooptijd:
-            root.append(
-                self.termijnTriggerStartLooptijd.to_xml("termijnTriggerStartLooptijd")
-            )
-
-        if self.termijnStartdatumLooptijd:
-            termijnStartdatumLooptijd = ET.SubElement(root, "termijnStartdatumLooptijd")
-            termijnStartdatumLooptijd.text = self.termijnStartdatumLooptijd
-
-        if self.termijnLooptijd:
-            termijnLooptijd = ET.SubElement(root, "termijnLooptijd")
-            termijnLooptijd.text = self.termijnLooptijd
-
-        if self.termijnEinddatum:
-            termijnEinddatum = ET.SubElement(root, "termijnEinddatum")
-            termijnEinddatum.text = self.termijnEinddatum
-
-        return root
-
 
 @dataclass
-class ChecksumGegevens:
+class ChecksumGegevens(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/checksum
 
     Note:
@@ -242,7 +215,7 @@ class ChecksumGegevens:
     checksumWaarde: str
     checksumDatum: str
 
-    def to_xml(self) -> ET.Element:
+    def to_xml(self, root: str = "checksum") -> ET.Element:
         """Transform ChecksumGegevens into XML tree with the following structure:
 
          ```xml
@@ -259,22 +232,11 @@ class ChecksumGegevens:
         Returns:
              ET.Element: XML representation of object
         """
-
-        root = ET.Element("checksum")
-
-        root.append(self.checksumAlgoritme.to_xml("checksumAlgoritme"))
-
-        checksumWaarde = ET.SubElement(root, "checksumWaarde")
-        checksumWaarde.text = self.checksumWaarde
-
-        checksumDatum = ET.SubElement(root, "checksumDatum")
-        checksumDatum.text = self.checksumDatum
-
-        return root
+        return super().to_xml(root)
 
 
 @dataclass
-class BeperkingGebruikGegevens:
+class BeperkingGebruikGegevens(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/beperkingGebruik
 
     Args:
@@ -289,36 +251,17 @@ class BeperkingGebruikGegevens:
     beperkingGebruikDocumentatie: VerwijzingGegevens | list[VerwijzingGegevens] = None
     beperkingGebruikTermijn: TermijnGegevens = None
 
-    def to_xml(self) -> ET.Element:
+    def to_xml(self, root: str = "beperkingGebruik") -> ET.Element:
         """Transform BeperkingGebruikGegevens into XML tree.
 
         Returns:
             ET.Element: XML representation of BeperkingGebruikGegevens
         """
-
-        root = ET.Element("beperkingGebruik")
-
-        root.append(self.beperkingGebruikType.to_xml("beperkingGebruikType"))
-
-        if self.beperkingGebruikNadereBeschrijving:
-            nadereBeschrijving = ET.SubElement(
-                root, "beperkingGebruikNadereBeschrijving"
-            )
-            nadereBeschrijving.text = self.beperkingGebruikNadereBeschrijving
-
-        if self.beperkingGebruikDocumentatie:
-            root.append(
-                self.beperkingGebruikDocumentatie.to_xml("beperkingGebruikDocumentatie")
-            )
-
-        if self.beperkingGebruikTermijn:
-            root.append(self.beperkingGebruikTermijn.to_xml("beperkingGebruikTermijn"))
-
-        return root
+        return super().to_xml(root)
 
 
 @dataclass
-class DekkingInTijdGegevens:
+class DekkingInTijdGegevens(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/dekkingInTijd
 
     Args:
@@ -331,23 +274,12 @@ class DekkingInTijdGegevens:
     dekkingInTijdBegindatum: str
     dekkingInTijdEinddatum: str = None
 
-    def to_xml(self) -> ET.Element:
-        root = ET.Element("dekkingInTijd")
-
-        root.append(self.dekkingInTijdType.to_xml("dekkingInTijdType"))
-
-        begin_datum_elem = ET.SubElement(root, "dekkingInTijdBegindatum")
-        begin_datum_elem.text = self.dekkingInTijdBegindatum
-
-        if self.dekkingInTijdEinddatum:
-            eind_datum_elem = ET.SubElement(root, "dekkingInTijdEinddatum")
-            eind_datum_elem.text = self.dekkingInTijdEinddatum
-
-        return root
+    def to_xml(self, root: str = "dekkingInTijd") -> ET.Element:
+        return super().to_xml(root)
 
 
 @dataclass
-class EventGegevens:
+class EventGegevens(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/event
 
     Args:
@@ -362,29 +294,12 @@ class EventGegevens:
     eventVerantwoordelijkeActor: VerwijzingGegevens = None
     eventResultaat: str = None
 
-    def to_xml(self) -> ET.Element:
-        root = ET.Element("event")
-
-        root.append(self.eventType.to_xml("eventType"))
-
-        if self.eventTijd:
-            event_tijd_elem = ET.SubElement(root, "eventTijd")
-            event_tijd_elem.text = self.eventTijd
-
-        if self.eventVerantwoordelijkeActor:
-            root.append(
-                self.eventVerantwoordelijkeActor.to_xml("eventVerantwoordelijkeActor")
-            )
-
-        if self.eventResultaat:
-            event_resultaat_elem = ET.SubElement(root, "eventResultaat")
-            event_resultaat_elem.text = self.eventResultaat
-
-        return root
+    def to_xml(self, root: str = "event") -> ET.Element:
+        return super().to_xml(root)
 
 
 @dataclass
-class RaadpleeglocatieGegevens:
+class RaadpleeglocatieGegevens(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/raadpleeglocatie
 
     Args:
@@ -395,18 +310,8 @@ class RaadpleeglocatieGegevens:
     raadpleeglocatieFysiek: VerwijzingGegevens = None
     raadpleeglocatieOnline: str = None
 
-    def to_xml(self):
-        root = ET.Element("raadpleeglocatie")
-
-        # raadpleeglocatie may have no children, strangely enough
-        if self.raadpleeglocatieFysiek:
-            root.append(self.raadpleeglocatieFysiek.to_xml("raadpleeglocatieFysiek"))
-
-        if self.raadpleeglocatieOnline:
-            raadpleeglocatie_online_elem = ET.SubElement(root, "raadpleeglocatieOnline")
-            raadpleeglocatie_online_elem.text = self.raadpleeglocatieOnline
-
-        return root
+    def to_xml(self, root: str = "raadpleeglocatie"):
+        return super().to_xml(root)
 
     @property
     def raadpleeglocatieOnline(self):
@@ -433,7 +338,7 @@ class RaadpleeglocatieGegevens:
 
 
 @dataclass
-class GerelateerdInformatieobjectGegevens:
+class GerelateerdInformatieobjectGegevens(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/gerelateerdInformatieobjectGegevens
 
     Args:
@@ -444,26 +349,12 @@ class GerelateerdInformatieobjectGegevens:
     gerelateerdInformatieobjectVerwijzing: VerwijzingGegevens
     gerelateerdInformatieobjectTypeRelatie: BegripGegevens
 
-    def to_xml(self) -> ET.Element:
-        root = ET.Element("gerelateerdInformatieobject")
-
-        root.append(
-            self.gerelateerdInformatieobjectVerwijzing.to_xml(
-                "gerelateerdInformatieobjectVerwijzing"
-            )
-        )
-
-        root.append(
-            self.gerelateerdInformatieobjectTypeRelatie.to_xml(
-                "gerelateerdInformatieobjectTypeRelatie"
-            )
-        )
-
-        return root
+    def to_xml(self, root: str = "gerelateerdInformatieobject") -> ET.Element:
+        return super().to_xml(root)
 
 
 @dataclass
-class BetrokkeneGegevens:
+class BetrokkeneGegevens(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/betrokkeneGegevens
 
     Args:
@@ -474,13 +365,8 @@ class BetrokkeneGegevens:
     betrokkeneTypeRelatie: BegripGegevens
     betrokkeneActor: VerwijzingGegevens
 
-    def to_xml(self) -> ET.Element:
-        root = ET.Element("betrokkene")
-
-        root.append(self.betrokkeneTypeRelatie.to_xml("betrokkeneTypeRelatie"))
-        root.append(self.betrokkeneActor.to_xml("betrokkeneActor"))
-
-        return root
+    def to_xml(self, root: str = "betrokkene") -> ET.Element:
+        return super().to_xml(root)
 
 
 @dataclass
@@ -504,9 +390,6 @@ class Object:
                 f"value '{self.naam}' of element 'naam' "
                 f"exceeds maximum length of {MAX_NAAM_LENGTH}."
             )
-
-    def to_xml(self):
-        pass
 
     def save(
         self,
@@ -539,7 +422,7 @@ class Object:
 
 # TODO: place more restrictions on taal?
 @dataclass
-class Informatieobject(Object):
+class Informatieobject(XMLSerializable, Object):
     """https://www.nationaalarchief.nl/archiveren/mdto/informatieobject
 
     Example:
@@ -598,6 +481,41 @@ class Informatieobject(Object):
     betrokkene: BetrokkeneGegevens | List[BetrokkeneGegevens] = None
     activiteit: VerwijzingGegevens = None
 
+    def _mdto_ordered_fields(self) -> List:
+        """Sort dataclass fields by their order in the MDTO XSD."""
+        sorting_mapping = {
+            "identificatie": 0,
+            "naam": 1,
+            "aggregatieniveau": 2,
+            "classificatie": 3,
+            "trefwoord": 4,
+            "omschrijving": 5,
+            "raadpleeglocatie": 6,
+            "dekkingInTijd": 7,
+            "dekkingInRuimte": 8,
+            "taal": 9,
+            "event": 10,
+            "waardering": 11,
+            "bewaartermijn": 12,
+            "informatiecategorie": 13,
+            "isOnderdeelVan": 14,
+            "bevatOnderdeel": 15,
+            "heeftRepresentatie": 16,
+            "aanvullendeMetagegevens": 17,
+            "gerelateerdInformatieobject": 18,
+            "archiefvormer": 19,
+            "betrokkene": 20,
+            "activiteit": 21,
+            "beperkingGebruik": 22,
+        }
+
+        return [
+            field
+            for field in sorted(
+                dataclasses.fields(self), key=lambda f: sorting_mapping[f.name]
+            )
+        ]
+
     def to_xml(self) -> ET.ElementTree:
         """Transform Informatieobject into an XML tree with the following structure:
 
@@ -632,108 +550,9 @@ class Informatieobject(Object):
             "https://www.nationaalarchief.nl/mdto https://www.nationaalarchief.nl/mdto/MDTO-XML1.0.1.xsd",
         )
 
-        root = ET.SubElement(mdto, "informatieobject")
-
-        # allow users to pass either a single IdentificatieGegevens object, or a list thereof
-        if isinstance(self.identificatie, IdentificatieGegevens):
-            self.identificatie = [self.identificatie]
-
-        for i in self.identificatie:
-            root.append(i.to_xml("identificatie"))
-
-        naam_elem = ET.SubElement(root, "naam")
-        naam_elem.text = self.naam
-
-        if self.aggregatieniveau:
-            root.append(self.aggregatieniveau.to_xml("aggregatieniveau"))
-
-        if self.classificatie:
-            root.append(self.classificatie.to_xml("classificatie"))
-
-        if self.trefwoord:
-            # allow users to pass either a single trefwoord, or a list thereof
-            if isinstance(self.trefwoord, str):
-                self.trefwoord = [self.trefwoord]
-
-            for t in self.trefwoord:
-                trefwoord = ET.SubElement(root, "trefwoord")
-                trefwoord.text = t
-
-        if self.omschrijving:
-            omschrijving_elem = ET.SubElement(root, "omschrijving")
-            omschrijving_elem.text = self.omschrijving
-
-        if self.raadpleeglocatie:
-            root.append(self.raadpleeglocatie.to_xml())
-
-        if self.dekkingInTijd:
-            root.append(self.dekkingInTijd.to_xml())
-
-        if self.dekkingInRuimte:
-            root.append(self.dekkingInRuimte.to_xml("dekkingInRuimte"))
-
-        if self.taal:
-            taal_elem = ET.SubElement(root, "taal")
-            taal_elem.text = self.taal
-
-        if self.event:
-            if isinstance(self.event, EventGegevens):
-                self.event = [self.event]
-
-            for e in self.event:
-                root.append(e.to_xml())
-
-        root.append(self.waardering.to_xml("waardering"))
-
-        if self.bewaartermijn:
-            root.append(self.bewaartermijn.to_xml("bewaartermijn"))
-
-        if self.informatiecategorie:
-            root.append(self.informatiecategorie.to_xml("informatiecategorie"))
-
-        if self.isOnderdeelVan:
-            root.append(self.isOnderdeelVan.to_xml("isOnderdeelVan"))
-
-        if self.bevatOnderdeel:
-            if isinstance(self.bevatOnderdeel, VerwijzingGegevens):
-                self.bevatOnderdeel = [self.bevatOnderdeel]
-
-            for b in self.bevatOnderdeel:
-                root.append(b.to_xml("bevatOnderdeel"))
-
-        if self.heeftRepresentatie:
-            root.append(self.heeftRepresentatie.to_xml("heeftRepresentatie"))
-
-        if self.aanvullendeMetagegevens:
-            if isinstance(self.aanvullendeMetagegevens, VerwijzingGegevens):
-                self.aanvullendeMetagegevens = [self.aanvullendeMetagegevens]
-            for b in self.aanvullendeMetagegevens:
-                root.append(b.to_xml("aanvullendeMetagegevens"))
-
-        if self.gerelateerdInformatieobject:
-            root.append(
-                self.gerelateerdInformatieobject.to_xml("gerelateerdInformatieobject")
-            )
-
-        root.append(self.archiefvormer.to_xml("archiefvormer"))
-
-        if self.betrokkene:
-            # allow users to pass either a single BetrokkeneGegevens object, or a list thereof
-            if isinstance(self.betrokkene, BetrokkeneGegevens):
-                self.betrokkene = [self.betrokkene]
-
-            for b in self.betrokkene:
-                root.append(b.to_xml())
-
-        if self.activiteit:
-            root.append(self.activiteit.to_xml("activiteit"))
-
-        # allow users to pass either a single BeperkingGebruikGegevens object, or a list thereof
-        if isinstance(self.beperkingGebruik, BeperkingGebruikGegevens):
-            self.beperkingGebruik = [self.beperkingGebruik]
-
-        for b in self.beperkingGebruik:
-            root.append(b.to_xml())
+        # convert all dataclass fields to their XML representation
+        children = super().to_xml("informatieobject")
+        mdto.append(children)
 
         tree = ET.ElementTree(mdto)
         # use tabs as indentation (this matches what MDTO does)
@@ -742,7 +561,7 @@ class Informatieobject(Object):
 
 
 @dataclass
-class Bestand(Object):
+class Bestand(XMLSerializable, Object):
     """https://www.nationaalarchief.nl/archiveren/mdto/bestand
 
     Note:
@@ -764,6 +583,12 @@ class Bestand(Object):
     checksum: ChecksumGegevens | List[ChecksumGegevens]
     isRepresentatieVan: VerwijzingGegevens
     URLBestand: str = None
+
+    def _mdto_ordered_fields(self) -> List:
+        """Sort dataclass fields by their order in the MDTO XSD."""
+        fields = super()._mdto_ordered_fields()
+        # swap order of isRepresentatieVan and URLbestand
+        return fields[:-2] + (fields[-1], fields[-2])
 
     def to_xml(self) -> ET.ElementTree:
         """
@@ -800,34 +625,9 @@ class Bestand(Object):
             "https://www.nationaalarchief.nl/mdto https://www.nationaalarchief.nl/mdto/MDTO-XML1.0.1.xsd",
         )
 
-        root = ET.SubElement(mdto, "bestand")
-
-        if isinstance(self.identificatie, IdentificatieGegevens):
-            self.identificatie = [self.identificatie]
-
-        for i in self.identificatie:
-            root.append(i.to_xml("identificatie"))
-
-        naam = ET.SubElement(root, "naam")
-        naam.text = self.naam
-
-        omvang = ET.SubElement(root, "omvang")
-        # ET wants str types
-        omvang.text = str(self.omvang)
-
-        # bestandsformaat can be None if fido detection failed and force is True
-        if self.bestandsformaat:
-            root.append(self.bestandsformaat.to_xml("bestandsformaat"))
-
-        root.append(self.checksum.to_xml())
-
-        if self.URLBestand:
-            url = ET.SubElement(root, "URLBestand")
-            url.text = self.URLBestand
-
-        # can be None if XML parsing failed
-        if self.isRepresentatieVan:
-            root.append(self.isRepresentatieVan.to_xml("isRepresentatieVan"))
+        # convert all dataclass fields to their XML representation
+        children = super().to_xml("bestand")
+        mdto.append(children)
 
         # use tabs as indentation (this matches what MDTO does)
         tree = ET.ElementTree(mdto)
@@ -891,6 +691,7 @@ def detect_verwijzing(informatieobject: TextIO) -> VerwijzingGegevens:
     if not (kenmerk is None or bron is None):
         id_gegevens = IdentificatieGegevens(kenmerk.text, bron.text)
 
+    # FIXME: this should be an unrecoverable error
     if naam is None:
         _error(f"informatieobject in {informatieobject} " "lacks a <naam> tag.")
     else:
