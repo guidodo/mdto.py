@@ -15,9 +15,9 @@ import lxml.etree as ET
 import validators
 
 # globals
-MAX_NAAM_LENGTH = 80
 _force, _quiet = False, False
 
+MDTO_MAX_NAAM_LENGTH = 80
 
 # Helper methods
 def _process_file(file_or_filename) -> TextIO:
@@ -386,10 +386,10 @@ class Object(XMLSerializable):
 
     def __post_init__(self):
         # check if name is of the right length
-        if len(self.naam) > MAX_NAAM_LENGTH:
+        if len(self.naam) > MDTO_MAX_NAAM_LENGTH:
             _warn(
                 f"value '{self.naam}' of element 'naam' "
-                f"exceeds maximum length of {MAX_NAAM_LENGTH}."
+                f"exceeds maximum length of {MDTO_MAX_NAAM_LENGTH}."
             )
 
     def to_xml(self, root: str) -> ET.ElementTree:
