@@ -206,7 +206,8 @@ class BeperkingGebruikGegevens(XMLSerializable):
     Args:
         beperkingGebruikType (BegripGegevens): Typering van de beperking
         beperkingGebruikNadereBeschrijving (Optional[str]): Beschrijving van de beperking
-        beperkingGebruikDocumentatie (Optional[VerwijzingGegevens]): Verwijzing naar een beschrijving van de beperking
+        beperkingGebruikDocumentatie (Optional[VerwijzingGegevens]): Verwijzing naar een tekstdocument met
+            daarin een beschrijving van de beperking
         beperkingGebruikTermijn (Optional[TermijnGegevens]): Termijn waarbinnen de beperking van toepassing is
     """
 
