@@ -94,7 +94,7 @@ pip install .
 De primaire doelstellingen van `mdto.py` is het versimpelen van het bouwen van MDTO XMLs via python. Om enkele voorbeelden te geven:
 
 ``` python
-from mdto import *
+from mdto.gegevensgroepen import *  # importeer alle *Gegevens klasses
 
 # maak identificatiekenmerk element
 informatieobject_id = IdentificatieGegevens("Informatieobject-4661a", "Proza (OCW-DMS)")
@@ -136,11 +136,16 @@ Je kan op een vergelijkbare manier Bestand objecten bouwen via de `Bestand()` cl
 
 
 ```python
-from mdto import *
+import mdto
 
 # 'informatieobject_001.xml' is het informatieobject waar het Bestand object een representatie van is
-with open('informatieobject_001.mdto.xml') as info_object:
-    bestand = create_bestand("vergunning.pdf", '34c5-4379-9f1a-5c378', 'Proza (DMS)', representatievan=info_object)
+with open("informatieobject_001.mdto.xml") as info_object:
+    bestand = mdto.create_bestand(
+            "vergunning.pdf",
+            "34c5-4379-9f1a-5c378",
+            "Proza (DMS)",
+            representatievan=info_object,
+        )
 
 # Sla op als XML bestand
 bestand.save("vergunning.bestand.mdto.xml")
