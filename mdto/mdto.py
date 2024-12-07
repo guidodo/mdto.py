@@ -18,11 +18,13 @@ logging.basicConfig(
 )
 logging.addLevelName(
     # colorize warning messages
-    logging.WARNING, "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.WARNING)
+    logging.WARNING,
+    "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.WARNING),
 )
 
 # globals
 MDTO_MAX_NAAM_LENGTH = 80
+
 
 # Helper methods
 def _process_file(file_or_filename) -> TextIO:
