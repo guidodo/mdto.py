@@ -171,7 +171,7 @@ from pathlib import Path
 # │   ├── 19880405KapvergunningHoogracht.mdto.xml
 # │   └── 19880405KapvergunningHoogracht.pdf
 # └── Verslag/
-#     ├── 19880409Verslag.mdto.bestand.xml
+#     ├── 19880409Verslag.bestand.mdto.xml
 #     ├── 19880409Verslag.mdto.xml
 #     └── 19880409Verslag.pdf
 
