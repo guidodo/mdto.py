@@ -615,46 +615,6 @@ class Bestand(Object, XMLSerializable):
             raise ValueError(f"URL '{url} is malformed")
 
 
-def detect_verwijzing(informatieobject: TextIO | str) -> VerwijzingGegevens:
-    """A Bestand object must contain a reference to a corresponding informatieobject.
-    Specifically, it expects an <isRepresentatieVan> tag with the following children:
-
-    1. <verwijzingNaam>: name of the informatieobject
-    2. <verwijzingIdentificatie> (optional): reference to the
-    informatieobject's ID and source thereof
-
-    This function infers these so-called 'VerwijzingGegevens' by
-    parsing the XML of the file `informatieobject`.
-
-    Args:
-        informatieobject (TextIO | str): XML file to infer VerwijzingGegevens from
-
-    Returns:
-        `VerwijzingGegevens`, refering to the informatieobject specified by `informatieobject`
-    """
-
-    id_gegevens = None
-    namespaces = {"mdto": "https://www.nationaalarchief.nl/mdto"}
-    tree = ET.parse(informatieobject)
-    root = tree.getroot()
-
-    id_xpath = ".//mdto:informatieobject/mdto:identificatie/"
-
-    kenmerk = root.find(f"{id_xpath}mdto:identificatieKenmerk", namespaces=namespaces)
-    bron = root.find(f"{id_xpath}mdto:identificatieBron", namespaces=namespaces)
-    naam = root.find(".//mdto:informatieobject/mdto:naam", namespaces=namespaces)
-
-    if None in [kenmerk, bron]:
-        raise ValueError(f"Failed to detect <identificatie> in {informatieobject}")
-
-    identificatie = IdentificatieGegevens(kenmerk.text, bron.text)
-
-    if naam is None:
-        raise ValueError(f"Failed to detect <naam> in {informatieobject}")
-
-    return VerwijzingGegevens(naam.text, identificatie)
-
-
 def pronominfo(path: str) -> BegripGegevens:
     # FIXME: format more properly
     """Use fido library to generate PRONOM information about a file.
@@ -728,6 +688,46 @@ def pronominfo(path: str) -> BegripGegevens:
         )
     else:
         raise RuntimeError(f"fido PRONOM detection failed on file {path}")
+
+
+def detect_verwijzing(informatieobject: TextIO | str) -> VerwijzingGegevens:
+    """A Bestand object must contain a reference to a corresponding informatieobject.
+    Specifically, it expects an <isRepresentatieVan> tag with the following children:
+
+    1. <verwijzingNaam>: name of the informatieobject
+    2. <verwijzingIdentificatie> (optional): reference to the
+    informatieobject's ID and source thereof
+
+    This function infers these so-called 'VerwijzingGegevens' by
+    parsing the XML of the file `informatieobject`.
+
+    Args:
+        informatieobject (TextIO | str): XML file to infer VerwijzingGegevens from
+
+    Returns:
+        `VerwijzingGegevens`, refering to the informatieobject specified by `informatieobject`
+    """
+
+    id_gegevens = None
+    namespaces = {"mdto": "https://www.nationaalarchief.nl/mdto"}
+    tree = ET.parse(informatieobject)
+    root = tree.getroot()
+
+    id_xpath = ".//mdto:informatieobject/mdto:identificatie/"
+
+    kenmerk = root.find(f"{id_xpath}mdto:identificatieKenmerk", namespaces=namespaces)
+    bron = root.find(f"{id_xpath}mdto:identificatieBron", namespaces=namespaces)
+    naam = root.find(".//mdto:informatieobject/mdto:naam", namespaces=namespaces)
+
+    if None in [kenmerk, bron]:
+        raise ValueError(f"Failed to detect <identificatie> in {informatieobject}")
+
+    identificatie = IdentificatieGegevens(kenmerk.text, bron.text)
+
+    if naam is None:
+        raise ValueError(f"Failed to detect <naam> in {informatieobject}")
+
+    return VerwijzingGegevens(naam.text, identificatie)
 
 
 def bestand_from_file(
