@@ -52,7 +52,7 @@ Naast gebruiksvriendelijkheid, streeft `mdto.py` ook een 100% correcte implement
 
 
 * Python 3.11 of nieuwer.
-* Sommige functies van `mdto.py` werken alleen als het programma `fido` in je `PATH` staat. Als je de instructies hieronder volgt gebeurd dit automatisch.
+* De PRONOM-detectie functionaliteit werkt alleen als het programma [`fido`](https://github.com/openpreserve/fido) in je `PATH` staat. Als je de instructies hieronder volgt gebeurd dit automatisch.
 
 ## Systeem-brede installatie
 
