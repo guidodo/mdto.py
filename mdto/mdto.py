@@ -753,11 +753,12 @@ def bestand_from_file(
     if isinstance(isrepresentatievan, (str, Path)) or hasattr(
         isrepresentatievan, "read"
     ):
-        informatieobject = helpers.process_file(isrepresentatievan)
-        informatieobject.close()
+        informatieobject_file = helpers.process_file(isrepresentatievan)
+        # Construct verwijzing from informatieobject file
         verwijzing_obj = _detect_verwijzing(informatieobject_file)
+        informatieobject_file.close()
     elif isinstance(isrepresentatievan, VerwijzingGegevens):
-        verwijzing_informatieobject = isrepresentatievan
+        verwijzing_obj = isrepresentatievan
     else:
         raise TypeError(
             "isrepresentatievan must either be a path/file, or a VerwijzingGegevens object."
@@ -766,13 +767,7 @@ def bestand_from_file(
     file.close()
 
     return Bestand(
-        identificatie,
-        naam,
-        omvang,
-        bestandsformaat,
-        checksum,
-        verwijzing_informatieobject,
-        url,
+        identificatie, naam, omvang, bestandsformaat, checksum, verwijzing_obj, url
     )
 
 
