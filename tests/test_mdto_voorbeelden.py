@@ -6,8 +6,7 @@ from mdto.gegevensgroepen import Informatieobject, Bestand
 
 def serialization_chain(xmlfile: str) -> str:
     """
-    Implements a serialization chain by calling from_xml(), and then re-converting that to XML with
-    to_xml().
+    Implements a serialization chain by calling from_xml(), followed by to_xml().
 
     Args:
         xmlfile (str): the xmlfile to run the chain on
