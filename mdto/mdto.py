@@ -184,8 +184,8 @@ class ChecksumGegevens(XMLSerializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/checksum
 
     Note:
-        When building Bestand objects, it's recommended to call the convience function `create_bestand()` instead.
-        Moreover, if you just need to update a Bestand object's checksum, you should use `create_checksum()`.
+        When building Bestand objects, it's recommended to call the convience function `bestand_from_file()`.
+        And if you just need to update a Bestand object's checksum, you should use `create_checksum()`.
     """
 
     checksumAlgoritme: BegripGegevens
@@ -550,7 +550,7 @@ class Bestand(Object, XMLSerializable):
 
     Note:
         When creating Bestand objects, it's easier to use the
-        `create_bestand()` convenience function instead.
+        `bestand_from_file()` convenience function instead.
 
     Args:
         identificatie (IdentificatieGegevens | List[IdentificatieGegevens]): Identificatiekenmerk
@@ -730,57 +730,65 @@ def pronominfo(path: str) -> BegripGegevens:
         raise RuntimeError(f"fido PRONOM detection failed on file {path}")
 
 
-def create_bestand(
-    infile: TextIO | str,
+def bestand_from_file(
+    file: TextIO | str,
     identificatie: IdentificatieGegevens | List[IdentificatieGegevens],
-    informatieobject: TextIO | str,
-    naam: str = None,
+    isrepresentatievan: VerwijzingGegevens | TextIO | str,
     url: str = None,
 ) -> Bestand:
-    """Convenience function for creating Bestand objects. The difference between this function
-    and calling Bestand() directly is that this function infers most Bestand-related
-    information for you (checksum, name, and so on), based on the characteristics of `infile`.
+    """Convenience function for creating a Bestand object from a file. The difference
+    between this function and calling Bestand() directly is that this function infers
+    most Bestand-related information for you (checksum, name, and so on), based on
+    the characteristics of `file`. The value of <naam>, for example, is always set to the
+    name of `file`.
 
 
     Args:
-      infile (TextIO | str): the file the Bestand object should represent
-      identificatie (IdentificatieGegevens | List[IdentificatieGegevens]): Identificatiekenmerk
-      informatieobject (TextIO | str): path or file-like object to a XML file containing an informatieobject.
-        Used to infer values for <isRepresentatieVan>.
-      naam (Optional[str]): value of <naam>. Defaults to the basename of `infile`
+      file (TextIO | str): the file the Bestand object represents
+      identificatie (IdentificatieGegevens | List[IdentificatieGegevens]): identificatiekenmerk of
+        Bestand object
+      isrepresentatievan (TextIO | str | VerwijzingGegevens): a XML file that contains an
+        an informatieobject, or a VerwijzingGegevens object referencing an informatieobject.
+        Used to construct the values for <isRepresentatieVan>.
       url (Optional[str]): value of <URLBestand>
 
     Example:
       ```python
 
       with open('informatieobject_001.xml') as f:
-          bestand = create_bestand("vergunning.pdf",
+          bestand = mdto.bestand_from_file("vergunning.pdf",
                                    IdentificatieGegevens('34c5-4379-9f1a-5c378', 'Proza (DMS)'),
                                    informatieobject=f)
-          xml = bestand.to_xml()
+     bestand.save("vergunning.bestand.mdto.xml")
       ```
 
     Returns:
         Bestand: new Bestand object
     """
     # allow infile to be a path (str)
-    infile = _process_file(infile)
+    file = _process_file(file)
 
-    if not naam:
-        naam = os.path.basename(infile.name)
+    # set <naam> to basename
+    naam = os.path.basename(file.name)
 
-    omvang = os.path.getsize(infile.name)
-    bestandsformaat = pronominfo(infile.name)
-    checksum = create_checksum(infile)
+    omvang = os.path.getsize(file.name)
+    bestandsformaat = pronominfo(file.name)
+    checksum = create_checksum(file)
 
-    informatieobject = _process_file(informatieobject)
-    isrepresentatievan = detect_verwijzing(informatieobject)
+    # file or file path?
+    if isinstance(isrepresentatievan, (str, Path)) or hasattr(isrepresentatievan, "read"):
+        informatieobject = _process_file(isrepresentatievan)
+        verwijzing_informatieobject = detect_verwijzing(informatieobject)
+        informatieobject.close()
+    elif isinstance(isrepresentatievan, VerwijzingGegevens):
+        verwijzing_informatieobject = isrepresentatievan
+    else:
+        raise TypeError("isrepresentatievan must either be a path/file, or a VerwijzingGegevens object.")
 
-    informatieobject.close()
-    infile.close()
+    file.close()
 
     return Bestand(
-        identificatie, naam, omvang, bestandsformaat, checksum, isrepresentatievan, url
+        identificatie, naam, omvang, bestandsformaat, checksum, verwijzing_informatieobject, url
     )
 
 
