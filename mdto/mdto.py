@@ -776,19 +776,29 @@ def bestand_from_file(
     checksum = create_checksum(file)
 
     # file or file path?
-    if isinstance(isrepresentatievan, (str, Path)) or hasattr(isrepresentatievan, "read"):
+    if isinstance(isrepresentatievan, (str, Path)) or hasattr(
+        isrepresentatievan, "read"
+    ):
         informatieobject = _process_file(isrepresentatievan)
         verwijzing_informatieobject = detect_verwijzing(informatieobject)
         informatieobject.close()
     elif isinstance(isrepresentatievan, VerwijzingGegevens):
         verwijzing_informatieobject = isrepresentatievan
     else:
-        raise TypeError("isrepresentatievan must either be a path/file, or a VerwijzingGegevens object.")
+        raise TypeError(
+            "isrepresentatievan must either be a path/file, or a VerwijzingGegevens object."
+        )
 
     file.close()
 
     return Bestand(
-        identificatie, naam, omvang, bestandsformaat, checksum, verwijzing_informatieobject, url
+        identificatie,
+        naam,
+        omvang,
+        bestandsformaat,
+        checksum,
+        verwijzing_informatieobject,
+        url,
     )
 
 
