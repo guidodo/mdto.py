@@ -44,7 +44,7 @@ def _process_file(file_or_filename) -> TextIO:
         # if file-like object, force it to be opened read-only
         if file_or_filename.writable():
             filename = file_or_filename.name
-            file_or_filename.close()
+            file_or_filename.close()  # FIXME: callers might get confused by suddenly closed files
             return open(filename, "r")
         else:
             return file_or_filename
@@ -836,7 +836,7 @@ def create_checksum(
     return ChecksumGegevens(checksumAlgoritme, checksumWaarde, checksumDatum)
 
 
-def from_file(mdto_xml: TextIO | str) -> Object:
+def from_xml(mdto_xml: TextIO | str) -> Object:
     """Construct a Informatieobject/Bestand object from a MDTO XML file.
 
     Note:
@@ -847,7 +847,7 @@ def from_file(mdto_xml: TextIO | str) -> Object:
     ```python
     import mdto
 
-    informatieobject = mdto.from_file("Voorbeeld Archiefstuk Informatieobject.xml")
+    informatieobject = mdto.from_xml("Voorbeeld Archiefstuk Informatieobject.xml")
 
     # edit the informatie object
     informatieobject.naam = "Verlenen kapvergunning Flipje's Erf 15 Tiel"

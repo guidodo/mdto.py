@@ -6,7 +6,7 @@ from mdto.gegevensgroepen import Informatieobject, Bestand
 
 def serialization_chain(xmlfile: str) -> str:
     """
-    Implements a serialization chain by calling from_file(), and then re-converting that to XML with
+    Implements a serialization chain by calling from_xml(), and then re-converting that to XML with
     to_xml().
 
     Args:
@@ -16,7 +16,7 @@ def serialization_chain(xmlfile: str) -> str:
         str: the re-serailized XML, as a string
     """
     # Deserialize
-    object = mdto.from_file(xmlfile)
+    object = mdto.from_xml(xmlfile)
 
     # Serialize back to XML
     output_tree = object.to_xml()
@@ -31,33 +31,33 @@ def serialization_chain(xmlfile: str) -> str:
     )
 
 
-def test_from_file_archiefstuk(voorbeeld_archiefstuk_xml):
-    """Test that from_file() correctly parses Voorbeeld Archiefstuk Informatieobject.xml"""
-    archiefstuk = mdto.from_file(voorbeeld_archiefstuk_xml)
+def test_from_xml_archiefstuk(voorbeeld_archiefstuk_xml):
+    """Test that from_xml() correctly parses Voorbeeld Archiefstuk Informatieobject.xml"""
+    archiefstuk = mdto.from_xml(voorbeeld_archiefstuk_xml)
 
     assert isinstance(archiefstuk, Informatieobject)
     assert archiefstuk.naam == "Verlenen kapvergunning Hooigracht 21 Den Haag"
 
 
-def test_from_file_dossier(voorbeeld_dossier_xml):
-    """Test that from_file() correctly parses Voorbeeld Dossier Informatieobject.xml"""
-    dossier = mdto.from_file(voorbeeld_dossier_xml)
+def test_from_xml_dossier(voorbeeld_dossier_xml):
+    """Test that from_xml() correctly parses Voorbeeld Dossier Informatieobject.xml"""
+    dossier = mdto.from_xml(voorbeeld_dossier_xml)
 
     assert isinstance(dossier, Informatieobject)
     assert dossier.trefwoord[1] == "kappen"
 
 
-def test_from_file_serie(voorbeeld_serie_xml):
-    """Test that from_file() correctly parses Voorbeeld Serie Informatieobject.xml"""
-    serie = mdto.from_file(voorbeeld_serie_xml)
+def test_from_xml_serie(voorbeeld_serie_xml):
+    """Test that from_xml() correctly parses Voorbeeld Serie Informatieobject.xml"""
+    serie = mdto.from_xml(voorbeeld_serie_xml)
 
     assert isinstance(serie, Informatieobject)
     assert serie.naam == "Vergunningen van de gemeente 's-Gravenhage vanaf 1980"
 
 
-def test_from_file_bestand(voorbeeld_bestand_xml):
-    """Test that from_file() correctly parses Voorbeeld Bestand.xml"""
-    bestand = mdto.from_file(voorbeeld_bestand_xml)
+def test_from_xml_bestand(voorbeeld_bestand_xml):
+    """Test that from_xml() correctly parses Voorbeeld Bestand.xml"""
+    bestand = mdto.from_xml(voorbeeld_bestand_xml)
 
     assert isinstance(bestand, Bestand)
     assert (
@@ -100,7 +100,7 @@ def test_serialization_chain_bestand(voorbeeld_bestand_xml):
 
 def test_file_saving(voorbeeld_archiefstuk_xml, tmp_path_factory):
     """Test if `save()` produces byte-for-byte equivalent XML from archiefstuk example"""
-    informatieobject = mdto.from_file(voorbeeld_archiefstuk_xml)
+    informatieobject = mdto.from_xml(voorbeeld_archiefstuk_xml)
 
     # location to write to
     tmpdir = tmp_path_factory.mktemp("Output")
