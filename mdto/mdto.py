@@ -665,7 +665,7 @@ def pronominfo(path: str) -> BegripGegevens:
         raise RuntimeError(f"fido PRONOM detection failed on file {path}")
 
 
-def detect_verwijzing(informatieobject: TextIO | str) -> VerwijzingGegevens:
+def _detect_verwijzing(informatieobject: TextIO | str) -> VerwijzingGegevens:
     """A Bestand object must contain a reference to a corresponding informatieobject.
     Specifically, it expects an <isRepresentatieVan> tag with the following children:
 
@@ -754,8 +754,8 @@ def bestand_from_file(
         isrepresentatievan, "read"
     ):
         informatieobject = helpers.process_file(isrepresentatievan)
-        verwijzing_informatieobject = detect_verwijzing(informatieobject)
         informatieobject.close()
+        verwijzing_obj = _detect_verwijzing(informatieobject_file)
     elif isinstance(isrepresentatievan, VerwijzingGegevens):
         verwijzing_informatieobject = isrepresentatievan
     else:
