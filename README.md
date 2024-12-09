@@ -144,7 +144,7 @@ import mdto
 obj_verwijzing = VerwijzingGegevens("Verlenen kapvergunning Hooigracht")
 
 bestand = mdto.bestand_from_file(
-        infile="vergunning.pdf",  # bestand waarvoor technische metagegevens moeten worden aangemaakt
+        file="vergunning.pdf",  # bestand waarvoor technische metagegevens moeten worden aangemaakt
         identificatie=Identificatiegegevens("34c5-4379-9f1a-5c378", "Proza (DMS)"),
         isrepresentatievan=obj_verwijzing
       )
