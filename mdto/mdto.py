@@ -640,7 +640,9 @@ def pronominfo(path: str) -> BegripGegevens:
     stderr = cmd_result.stderr
     returncode = cmd_result.returncode
 
-    # TODO: maybe log more warnings from fido?
+    # FIXME: log more warnings from fido?
+    # maybe try on waczs, and see what it outputs on zipfiles
+    # (it should report an extension mismatch)
     # fido prints warnings about empty files to stderr
     if "(empty)" in stderr.lower():
         logging.warning(f"file {path} appears to be an empty file")
