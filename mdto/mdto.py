@@ -39,8 +39,8 @@ class XMLSerializable:
         a dataclass does not match the order required by the MDTO XSD.
 
         Such mismatches occur because Python only allows optional arguments
-        at the _end_ of a function's signature, while MDTO allows optional
-        attributes to appear anywhere.
+        at the _end_ of a function's signature, while schemas such as the
+        MDTO XSD allow optional attributes to appear anywhere.
         """
         return dataclasses.fields(self)
 
@@ -54,11 +54,11 @@ class XMLSerializable:
             ET.Element: XML representation of object new root tag
         """
         root_elem = ET.Element(root)
-        # get dataclass fields, but in the order required in the MDTO XSD
+        # get dataclass fields, but in the order required by the MDTO XSD
         fields = self._mdto_ordered_fields()
 
         # TODO: add a call to yet-to-be-implemented .validate() method here
-        # This call will raise an error if the value(s) of field a in a dataclass are not of the right type
+        # This call will raise an error if the value(s) of field in a dataclass are not of the right type
 
         # process all fields in dataclass
         for field in fields:
@@ -387,7 +387,7 @@ class Object(XMLSerializable):
               If passing a file-like object, the file must be opened
               in writeable binary mode (i.e. `wb`).
             lxml_args (Optional[dict]): Extra keyword arguments to pass to lxml's write() method.
-              Defaults to `xml_declaration=True, pretty_print=True, encoding="UTF-8"`.
+              Defaults to `{xml_declaration=True, pretty_print=True, encoding="UTF-8"}`.
 
         Note:
             For a complete list of options for lxml's write method, see
@@ -715,7 +715,7 @@ def bestand_from_file(
     between this function and calling Bestand() directly is that this function infers
     most Bestand-related information for you (checksum, name, and so on), based on
     the characteristics of `file`. The value of <naam>, for example, is always set to the
-    name of `file`.
+    basename of `file`.
 
 
     Args:
@@ -819,7 +819,7 @@ def from_xml(mdto_xml: TextIO | str) -> Object:
     """Construct a Informatieobject/Bestand object from a MDTO XML file.
 
     Note:
-        When `xmlfile` is invalid MDTO, this function will probably throw an error.
+        When `mdto_xml` is invalid MDTO, this function will probably throw an error.
 
     Example:
 
@@ -831,8 +831,8 @@ def from_xml(mdto_xml: TextIO | str) -> Object:
     # edit the informatie object
     informatieobject.naam = "Verlenen kapvergunning Flipje's Erf 15 Tiel"
 
-    # save it to a new file (or override the original, if desired)
-    informatieobject.save("path/to/new/file.xml")
+    # override the original informatieobject XML
+    informatieobject.save("Voorbeeld Archiefstuk Informatieobject.xml")
     ```
 
     Args:
@@ -866,11 +866,11 @@ def from_xml(mdto_xml: TextIO | str) -> Object:
             )
 
     def elem_to_mdto(elem: ET.Element, mdto_class: classmethod, mdto_xml_parsers: dict):
-        """Construct MDTO class from given XML element, using parsers specified in
-        mdto_xml_parsers.
+        """Initialize MDTO class (TermijnGegevens, EventGegevens, etc.) with values
+        from a given XML node, using parsers specified in `mdto_xml_parsers`.
 
         Returns:
-            MDTO instance: a initialized MDTO instance of type `mdto_class`
+            MDTO instance: a initialized MDTO instance of `mdto_class`
         """
         # initialize dictionary of keyword arguments (to be passed to MDTO class constructor)
         constructor_args = {mdto_field: [] for mdto_field in mdto_xml_parsers}
@@ -884,12 +884,12 @@ def from_xml(mdto_xml: TextIO | str) -> Object:
             # add value of parsed child element to class constructor args
             constructor_args[mdto_field].append(xml_parser(child))
 
-        # cleanup constructor args
+        # cleanup class constructor arguments
         for argname, value in constructor_args.items():
-            # Convert empty argument lists into None values
+            # Replace empty argument lists by None
             if len(value) == 0:
                 constructor_args[argname] = None
-            # Convert one-itemed argument lists to non-lists
+            # Replace one-itemed argument lists by their respective item
             elif len(value) == 1:
                 constructor_args[argname] = value[0]
 
