@@ -63,9 +63,12 @@ class XMLSerializable:
         # process all fields in dataclass
         for field in fields:
             field_name = field.name
+            # get value assigned to field
             field_value = getattr(self, field_name)
+            # serialize field name and value, and add result to root element
             self._process_dataclass_field(root_elem, field_name, field_value)
 
+        # return the tree
         return root_elem
 
     def _process_dataclass_field(
@@ -74,7 +77,7 @@ class XMLSerializable:
         """Recursively process a dataclass field, and append its XML representation to `root_elem`."""
 
         if field_value is None:
-            # skip fields with no value
+            # skip empty fields
             return
         elif isinstance(field_value, (list, tuple, set)):
             # serialize all *Gegevens objects in a sequence
@@ -371,6 +374,7 @@ class Object(XMLSerializable):
         ET.indent(tree, space="\t")
         return tree
 
+    # FIXME: change write mode to binary internally
     def save(
         self,
         file_or_filename: str | TextIO,
@@ -636,6 +640,7 @@ def pronominfo(path: str) -> BegripGegevens:
     stderr = cmd_result.stderr
     returncode = cmd_result.returncode
 
+    # TODO: maybe log more warnings from fido?
     # fido prints warnings about empty files to stderr
     if "(empty)" in stderr.lower():
         logging.warning(f"file {path} appears to be an empty file")
@@ -826,6 +831,7 @@ def from_xml(mdto_xml: TextIO | str) -> Object:
     ```python
     import mdto
 
+    # read informatieobject from file
     informatieobject = mdto.from_xml("Voorbeeld Archiefstuk Informatieobject.xml")
 
     # edit the informatie object
@@ -865,6 +871,7 @@ def from_xml(mdto_xml: TextIO | str) -> Object:
                 parse_identificatie(node[1]),
             )
 
+    # FIXME: return value
     def elem_to_mdto(elem: ET.Element, mdto_class: classmethod, mdto_xml_parsers: dict):
         """Initialize MDTO class (TermijnGegevens, EventGegevens, etc.) with values
         from a given XML node, using parsers specified in `mdto_xml_parsers`.
