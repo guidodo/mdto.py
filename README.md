@@ -3,7 +3,7 @@
 [![unit test badge](https://github.com/Regionaal-Archief-Rivierenland/mdto.py/actions/workflows/pytest.yml/badge.svg)](https://github.com/Regionaal-Archief-Rivierenland/mdto.py/actions)
 [![codecov](https://codecov.io/gh/Regionaal-Archief-Rivierenland/mdto.py/graph/badge.svg?token=9VW5IT370J)](https://codecov.io/gh/Regionaal-Archief-Rivierenland/mdto.py)
 
-`mdto.py` is een python library die helpt bij het aanmaken, aanpassen, en controleren van [MDTO XML](https://www.nationaalarchief.nl/archiveren/mdto/xml-schema) bestanden. Denk bijvoorbeeld aan het automatisch genereren van technische metagegevens, of wat in MDTO het objectsoort [Bestand](https://www.nationaalarchief.nl/archiveren/mdto/metagegevensschema#collapse-102796) wordt genoemd:
+`mdto.py` is een Python library die helpt bij het aanmaken, aanpassen, en controleren van [MDTO XML](https://www.nationaalarchief.nl/archiveren/mdto/xml-schema) bestanden. Denk bijvoorbeeld aan het automatisch genereren van technische metagegevens, of wat in MDTO het objectsoort [Bestand](https://www.nationaalarchief.nl/archiveren/mdto/metagegevensschema#collapse-102796) wordt genoemd:
 
 ``` xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -88,11 +88,11 @@ pip install .
 ```
 </details>
 
-# 📖 `mdto.py` als python library
+# 📖 `mdto.py` als Python library
 
 ## XML bestanden bouwen
 
-De primaire doelstellingen van `mdto.py` is het versimpelen van het bouwen van MDTO XMLs via python. Om enkele voorbeelden te geven:
+De primaire doelstellingen van `mdto.py` is het versimpelen van het bouwen van MDTO XMLs via Python. Om enkele voorbeelden te geven:
 
 ``` python
 from mdto.gegevensgroepen import *  # importeer VerwijzingGegevens, BegripGegevens, BegripGegevens, etc.
@@ -123,7 +123,7 @@ informatieobject.save("informatieobject-4661a.mdto.xml")
 
 `mdto.py` zorgt dat al deze informatie in de juiste volgorde in de XML terechtkomt — resulterende bestanden zijn altijd 100% valide MDTO.
 
-In tegenstelling tot python's ingebouwde XML library [`xml.etree`](https://docs.python.org/3/library/xml.etree.elementtree.html) kun je het bovenstaand `informatieobject` gemakkelijk inspecteren en veranderen, bijvoorbeeld via `print()`:
+In tegenstelling tot Python's ingebouwde XML library [`xml.etree`](https://docs.python.org/3/library/xml.etree.elementtree.html) kun je het bovenstaand `informatieobject` gemakkelijk inspecteren en veranderen, bijvoorbeeld via `print()`:
 
 ``` python-console
 >>> print(informatieobject)
@@ -157,7 +157,7 @@ Het resulterende XML bestand bevat vervolgens de correcte `<omvang>`, `<bestands
 
 ## XML bestanden inlezen
 
-`mdto.py` kan ook MDTO bestanden inlezen en naar python MDTO objecten omzetten via de `from_xml` functie.
+`mdto.py` kan ook MDTO bestanden inlezen en naar Python MDTO objecten omzetten via de `from_xml` functie.
 
 Stel bijvoorbeeld dat je alle checksums van Bestand XML bestanden wilt updaten:
 
