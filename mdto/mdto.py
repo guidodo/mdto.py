@@ -9,7 +9,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, List, TextIO
 
-from . import helpers
+try:
+    from . import helpers  # Package context
+except ImportError:
+    import helpers  # Direct execution
 
 import lxml.etree as ET
 import validators
