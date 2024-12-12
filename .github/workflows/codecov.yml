@@ -20,8 +20,9 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: pip install pytest pytest-cov .
+      - name: Install mdto.py and dependencies
+        run: |
+          pip install pytest pytest-cov .
 
       - name: Run tests
         run: pytest --cov --cov-report=xml

@@ -14,16 +14,20 @@ jobs:
     runs-on: ubuntu-latest  # this is the only distro available 🙃
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - name: Install mdto.py and dependencies
         run: |
-          python -m pip install --upgrade pip
           pip install pytest # pytest ≠ project dep, so add it here
           pip install .
+
       - name: Run tests
         run: pytest
