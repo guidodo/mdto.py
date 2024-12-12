@@ -713,7 +713,7 @@ def pronominfo(file: str | Path) -> BegripGegevens:
     fido_found = shutil.which("fido")
     pronom_backend = os.environ.get("PRONOM_BACKEND", None)
 
-    if not pronom_backend is None and pronom_backend not in ("fido", "siegfried"):
+    if pronom_backend is not None and pronom_backend not in ("fido", "siegfried"):
         raise ValueError(
             f"invalid PRONOM backend '{pronom_backend}' specified in PRONOM_BACKEND."
             "Valid options are 'fido' or 'siegfried'"
