@@ -1,5 +1,6 @@
 import dataclasses
 import hashlib
+import json
 import logging
 import os
 import shutil
@@ -597,35 +598,11 @@ class Bestand(Object, XMLSerializable):
             raise ValueError(f"URL '{url} is malformed")
 
 
-def pronominfo(path: str) -> BegripGegevens:
-    # FIXME: format more properly
-    """Use fido library to generate PRONOM information about a file.
-    This information can be used in the <bestandsformaat> tag.
-
-    Args:
-        path (str): path to the file to inspect
-
-    Returns:
-        ``BegripGegevens`` object with the following properties::
-            {
-                `begripLabel`: file's PRONOM signature name
-                `begripCode`: file's PRONOM ID
-                `begripBegrippenLijst`: reference to PRONOM registry
-            }
-    """
-
+def _pronominfo_fido(file: str | Path) -> BegripGegevens:
     # Note: fido currently lacks a public API
     # Hence, the most robust solution is to invoke fido as a cli program
     # Upstream issue: https://github.com/openpreserve/fido/issues/94
-    # downside is that this is slow, maybe siegfried speeds things up?
-
-    # check if fido program exists
-    if not shutil.which("fido"):
-        raise RuntimeError(
-            "Program 'fido' not found. For installation instructions, "
-            "see https://github.com/openpreserve/fido#installation"
-        )
-
+    # FIXME: log more warnings from fido?
     cmd = [
         "fido",
         "-q",
@@ -633,46 +610,148 @@ def pronominfo(path: str) -> BegripGegevens:
         "OK,%(info.formatname)s,%(info.puid)s,\n",
         "-nomatchprintf",
         "FAIL",
-        path,
+        file,
     ]
 
-    cmd_result = subprocess.run(
+    result = subprocess.run(
         cmd, capture_output=True, shell=False, text=True, check=True
     )
-    stdout = cmd_result.stdout
-    stderr = cmd_result.stderr
-    returncode = cmd_result.returncode
 
-    # FIXME: log more warnings from fido?
-    # maybe try on waczs, and see what it outputs on zipfiles
-    # (it should report an extension mismatch)
+    stdout, stderr = result.stdout, result.stderr
+
     # fido prints warnings about empty files to stderr
     if "(empty)" in stderr.lower():
-        logging.warning(f"file {path} appears to be an empty file")
+        logging.warning(f"{file} appears to be an empty file")
 
-    # check for errors
-    if returncode != 0:
-        raise RuntimeError(
-            f"fido PRONOM detection failed on file {path} with error:\n {stderr}"
-        )
-    elif stdout.startswith("OK"):
-        results = stdout.split("\n")
-        if len(results) > 2:  # .split('\n') returns a list of two items
+    # found a match!
+    if stdout.startswith("OK"):
+        matches = stdout.rstrip().split("\n")
+        if len(matches) > 1:
             logging.warning(
                 "fido returned more than one PRONOM match "
-                f"for file {path}. Selecting the first one."
+                f"for {file}. Selecting the first one."
             )
 
         # strip "OK" from the output
-        results = results[0].split(",")[1:]
+        matches = matches[0].split(",")[1:]
         verwijzing = VerwijzingGegevens(verwijzingNaam="PRONOM-register")
         return BegripGegevens(
-            begripLabel=results[0],
-            begripCode=results[1],
+            begripLabel=matches[0],
+            begripCode=matches[1],
             begripBegrippenlijst=verwijzing,
         )
     else:
-        raise RuntimeError(f"fido PRONOM detection failed on file {path}")
+        raise RuntimeError(f"fido PRONOM detection failed on {file}")
+
+
+def _pronominfo_siegfried(file: str | Path) -> BegripGegevens:
+    cmd = ["sf", "--json", "--sym", file]
+
+    result = subprocess.run(
+        cmd, capture_output=True, shell=False, text=True, check=True
+    )
+
+    # extract info about first file, since only one file is being passed to sf
+    sf_json = json.loads(result.stdout)["files"][0]
+
+    if "empty" in sf_json["errors"]:
+        logging.warning(f"{file} appears to be an empty file")
+
+    # extract match
+    matches = sf_json["matches"]
+    if len(matches) > 1:
+        logging.warning(
+            "siegfried returned more than one PRONOM match "
+            f"for {file}. Selecting the first one."
+        )
+    match = matches[0]
+
+    # check if a match was found
+    if match["id"] == "UNKNOWN":
+        raise RuntimeError(
+            f"siegfried failed to detect PRONOM information about {file}"
+        )
+
+    # log sf's warnings (such as extension mismatches)
+    warning = match["warning"]
+    if warning:
+        logging.warning(
+            f"siegfried reports PRONOM warning about {file}: {warning}"
+        )
+
+    return BegripGegevens(
+        begripLabel=match["format"],
+        begripCode=match["id"],
+        begripBegrippenlijst=VerwijzingGegevens("PRONOM-register"),
+    )
+
+
+def pronominfo(file: str | Path) -> BegripGegevens:
+    """Generate PRONOM information about `file`. This information can be used in
+    a Bestand's `<bestandsformaat>` tag.
+
+    mdto.py supports two backends for PRONOM detection: fido and sf
+    (siegfried). The default backend is sf; unless sf is not found, in which
+    case fido is used as an automatic fallback. Set the environment variable
+    `PRONOM_BACKEND` to fido/siegfried to manually select a backend
+    (e.g. `PRONOM_BACKEND=fido your_script.py ...`).
+
+    Args:
+        file (str | Path): Path to the file to inspect
+
+    Returns:
+        BegripGegevens: Object with the following attributes:
+          - `begripLabel`: The file's PRONOM signature name
+          - `begripCode`: The file's PRONOM ID
+          - `begripBegrippenLijst`: A reference to the PRONOM registry
+    """
+    # check if file exists and is indeed a file (as opposed to a directory)
+    if not os.path.isfile(file):
+        raise TypeError(f"File '{file}' does not exist or might be a directory")
+
+    siegfried_found = shutil.which("sf")
+    fido_found = shutil.which("fido")
+    pronom_backend = os.environ.get("PRONOM_BACKEND", None)
+
+    if not pronom_backend is None and pronom_backend not in ("fido", "siegfried"):
+        raise ValueError(
+            f"invalid PRONOM backend '{pronom_backend}' specified in PRONOM_BACKEND."
+            "Valid options are 'fido' or 'siegfried'"
+        )
+
+    # If PRONOM_BACKEND is not set, default to siegfried, unless siegfried is not found.
+    # In that case, fallback to fido.
+    if pronom_backend is None:
+        if siegfried_found:
+            pronom_backend = "siegfried"
+        elif fido_found:
+            pronom_backend = "fido"
+        else:
+            raise RuntimeError(
+                "Neither 'fido' nor 'sf' (siegfried) appear to be installed. "
+                "At least one of these program is required for PRONOM detection. "
+                "For installation instructions, "
+                "see https://github.com/openpreserve/fido#installation (fido) "
+                "or https://github.com/richardlehane/siegfried#install (siegfried)"
+            )
+
+    if pronom_backend == "siegfried":
+        if not siegfried_found:
+            raise RuntimeError(
+                "Program 'sf' (siegfried) not found. "
+                "For installation instructions, see https://github.com/richardlehane/siegfried#install"
+            )
+        # log choice?
+        return _pronominfo_siegfried(file)
+
+    elif pronom_backend == "fido":
+        if not fido_found:
+            raise RuntimeError(
+                "Program 'fido' not found. "
+                "For installation instructions, see https://github.com/openpreserve/fido#installation"
+            )
+        # log choice?
+        return _pronominfo_fido(file)
 
 
 def _detect_verwijzing(informatieobject: TextIO | str) -> VerwijzingGegevens:
