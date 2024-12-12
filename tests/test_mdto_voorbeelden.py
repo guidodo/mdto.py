@@ -108,7 +108,6 @@ def test_file_saving(voorbeeld_archiefstuk_xml, tmp_path_factory):
     informatieobject.save(outfile)
 
     # MDTO uses CRLF (DOS) line endings. Convert them to UNIX line endings.
-    # FIXME: this is probably not needed on *dos systems?
     with open(voorbeeld_archiefstuk_xml, "rb") as f:
         # Example files also contain newlines at the end of files, so add this
         voorbeeld_archiefstuk_xml_lf_endings = b"\n".join(f.read().splitlines()) + b"\n"
