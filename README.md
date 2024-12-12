@@ -137,8 +137,8 @@ Je kan op een vergelijkbare manier Bestand objecten bouwen via de `Bestand()` cl
 
 
 ```python
-from mdto.gegevensgroepen import *
 import mdto
+from mdto.gegevensgroepen import *
 
 # verwijzing naar bijbehorend informatieobject
 obj_verwijzing = VerwijzingGegevens("Verlenen kapvergunning Hooigracht")
