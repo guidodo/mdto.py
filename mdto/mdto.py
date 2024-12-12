@@ -690,7 +690,7 @@ def _detect_verwijzing(informatieobject: TextIO | str) -> VerwijzingGegevens:
         informatieobject (TextIO | str): XML file to infer VerwijzingGegevens from
 
     Returns:
-        `VerwijzingGegevens`, refering to the informatieobject specified by `informatieobject`
+        VerwijzingGegevens: reference to the informatieobject specified by `informatieobject`
     """
 
     id_gegevens = None
