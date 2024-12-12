@@ -10,6 +10,7 @@ description = "Library voor het genereren van MDTO XML bestanden"
 readme = "README.md"
 requires-python = ">=3.11"
 keywords = ["MDTO", "archiving"]
+keywords = ["MDTO", "archiving", "Goverment data"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
