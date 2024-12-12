@@ -26,6 +26,7 @@ jobs:
       - name: Install mdto.py and dependencies
         run: |
           go install github.com/richardlehane/siegfried/cmd/sf@latest
+          sf -update
           pip install pytest pytest-cov .
 
       - name: Run tests
