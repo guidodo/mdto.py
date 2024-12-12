@@ -9,7 +9,6 @@ license = { file = "LICENSE"}
 description = "Library voor het genereren van MDTO XML bestanden"
 readme = "README.md"
 requires-python = ">=3.11"
-keywords = ["MDTO", "archiving"]
 keywords = ["MDTO", "archiving", "Goverment data"]
 classifiers = [
     "Programming Language :: Python :: 3",
