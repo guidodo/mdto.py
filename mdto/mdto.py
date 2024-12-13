@@ -67,7 +67,6 @@ class XMLSerializable:
         # process all fields in dataclass
         for field in fields:
             field_name = field.name
-            # get value assigned to field
             field_value = getattr(self, field_name)
             # serialize field name and value, and add result to root element
             self._process_dataclass_field(root_elem, field_name, field_value)
