@@ -713,17 +713,17 @@ def pronominfo(file: str | Path) -> BegripGegevens:
     fido_found = shutil.which("fido")
     pronom_backend = os.environ.get("PRONOM_BACKEND", None)
 
-    if pronom_backend is not None and pronom_backend not in ("fido", "siegfried"):
+    if pronom_backend is not None and pronom_backend not in ("fido", "siegfried", "sf"):
         raise ValueError(
-            f"invalid PRONOM backend '{pronom_backend}' specified in PRONOM_BACKEND."
-            "Valid options are 'fido' or 'siegfried'"
+            f"invalid PRONOM backend '{pronom_backend}' specified in PRONOM_BACKEND. "
+            "Valid options are 'fido' or 'sf'"
         )
 
     # If PRONOM_BACKEND is not set, default to siegfried, unless siegfried is not found.
     # In that case, fallback to fido.
     if pronom_backend is None:
         if siegfried_found:
-            pronom_backend = "siegfried"
+            pronom_backend = "sf"
         elif fido_found:
             pronom_backend = "fido"
         else:
@@ -735,7 +735,7 @@ def pronominfo(file: str | Path) -> BegripGegevens:
                 "or https://github.com/richardlehane/siegfried#install (siegfried)"
             )
 
-    if pronom_backend == "siegfried":
+    if pronom_backend in ("sf", "siegfried"):
         if not siegfried_found:
             raise RuntimeError(
                 "Program 'sf' (siegfried) not found. "
