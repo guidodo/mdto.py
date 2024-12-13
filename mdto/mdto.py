@@ -257,7 +257,7 @@ class RaadpleeglocatieGegevens(XMLSerializable):
     """
 
     raadpleeglocatieFysiek: VerwijzingGegevens | List[VerwijzingGegevens] = None
-    raadpleeglocatieOnline: str | List[VerwijzingGegevens] = None
+    raadpleeglocatieOnline: str | List[str] = None
 
     def to_xml(self, root: str = "raadpleeglocatie"):
         return super().to_xml(root)
