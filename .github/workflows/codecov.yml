@@ -1,4 +1,4 @@
-name: Run tests and upload coverage
+name: Generate and upload test coverage
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    name: Run tests and collect coverage
+    name: Generate and upload test coverage
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,7 +29,7 @@ jobs:
           sf -update
           pip install pytest pytest-cov .
 
-      - name: Run tests
+      - name: Generate coverage report
         run: pytest --cov --cov-report=xml
 
       - name: Upload results to Codecov
