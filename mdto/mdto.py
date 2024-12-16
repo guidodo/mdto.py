@@ -8,7 +8,7 @@ import subprocess
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List, TextIO
+from typing import Any, List, TextIO, Union, get_args, get_origin
 
 # allow running mdto.py directly from interpreter:
 try:
@@ -34,8 +34,79 @@ logging.addLevelName(
 )
 
 
-class XMLSerializable:
-    """Provides a to_xml() method for converting MDTO dataclasses to XML."""
+class ValidationError(TypeError):
+    """Custom formatter for MDTO validation errors"""
+
+    def __init__(self, field_path: List[str], msg: str):
+        super().__init__(f"{'.'.join(field_path)}:\n\t{msg}")
+        self.field_path = field_path
+        self.msg = msg
+
+
+# TODO: update name and docstring to be more descriptive? Now, this class does more than just serialize
+# or maybe refactor?
+class Serializable:
+    """Provides is_valid() and to_xml() methods for converting MDTO dataclasses
+    to valid MDTO XML."""
+
+    def validate(self) -> None:
+        """Validate the object's fields against the MDTO schema. Additional
+        validation logic can be incorporated by extending this method in a
+        subclass.
+
+        Note:
+           Typing information is infered based on type hints.
+
+        Raises:
+            ValidationError: field violates typing constraints of MDTO schema
+        """
+        for field in dataclasses.fields(self):
+            field_name = field.name
+            field_value = getattr(self, field_name)
+            field_type = field.type
+            optional_field = field.default is None
+            cls_name = self.__class__.__name__
+            _ValidationError = lambda m: ValidationError([cls_name, field_name], m)
+
+            # optional fields may be None/empty
+            if optional_field and not field_value:
+                continue
+
+            if not optional_field and not field_value:
+                raise _ValidationError("mandatory field cannot be empty or None")
+
+            # check if field is listable based on type hint
+            if get_origin(field_type) is Union:
+                expected_type = get_args(field_type)[0]
+                listable = True
+            else:
+                expected_type = field_type
+                listable = False
+
+            if isinstance(field_value, (list, tuple, set)):
+                if not listable:
+                    raise _ValidationError(
+                        f"got type {type(field_value).__name__}, but field does not accept sequences"
+                    )
+
+                if not all(isinstance(item, expected_type) for item in field_value):
+                    raise _ValidationError(
+                        f"list items must be {expected_type.__name__}, "
+                        f"but found {', '.join(set(type(i).__name__ for i in field_value))}"
+                    )
+            elif not isinstance(field_value, expected_type):
+                raise _ValidationError(
+                    f"expected type {expected_type.__name__}, got {type(field_value).__name__}"
+                )
+            elif isinstance(field_value, Serializable):
+                # catch errors recursively to reconstruct full field path in error message
+                try:
+                    field_value.validate()
+                except ValidationError as deeper_error:
+                    raise ValidationError(
+                        [cls_name, field_name] + deeper_error.field_path,
+                        deeper_error.msg,
+                    ) from None  # Suppress the original traceback
 
     def _mdto_ordered_fields(self) -> List:
         """Sort dataclass fields by their order in the MDTO XSD.
@@ -48,6 +119,66 @@ class XMLSerializable:
         MDTO XSD allow optional attributes to appear anywhere.
         """
         return dataclasses.fields(self)
+
+    def validate(self) -> None:
+        """Validate the object's fields against the MDTO schema. Additional
+        validation logic can be incorporated by extending this method in a
+        subclass.
+
+        Note:
+           Typing information is infered based on type hints.
+
+        Raises:
+            ValidationError: field violates typing constraints of MDTO schema
+        """
+        for field in dataclasses.fields(self):
+            # breakpoint()
+            field_name = field.name
+            field_value = getattr(self, field_name)
+            field_type = field.type
+            optional_field = field.default is None
+            cls_name = self.__class__.__name__
+            _ValidationError = lambda m: ValidationError([cls_name, field_name], m)
+
+            # optional fields may be None/empty
+            if optional_field and not field_value:
+                continue
+
+            if not optional_field and not field_value:
+                raise _ValidationError("mandatory field cannot be empty or None")
+
+            # check if field is listable based on type hint
+            if get_origin(field_type) is Union:
+                expected_type = get_args(field_type)[0]
+                listable = True
+            else:
+                expected_type = field_type
+                listable = False
+
+            if isinstance(field_value, (list, tuple, set)):
+                if not listable:
+                    raise _ValidationError(
+                        f"got type {type(field_value).__name__}, but field does not accept sequences"
+                    )
+
+                if not all(isinstance(item, expected_type) for item in field_value):
+                    raise _ValidationError(
+                        f"list items must be {expected_type.__name__}, "
+                        f"but found {', '.join(set(type(i).__name__ for i in field_value))}"
+                    )
+            elif not isinstance(field_value, expected_type):
+                raise _ValidationError(
+                    f"expected type {expected_type.__name__}, got {type(field_value).__name__}"
+                )
+            elif isinstance(field_value, Serializable):
+                # catch errors recursively to reconstruct full field path in error message
+                try:
+                    field_value.validate()
+                except ValidationError as deeper_error:
+                    raise ValidationError(
+                        [cls_name, field_name] + deeper_error.field_path,
+                        deeper_error.msg,
+                    ) from None  # Suppress the original traceback
 
     def to_xml(self, root: str) -> ET.Element:
         """Transform dataclass to XML tree.
@@ -87,18 +218,17 @@ class XMLSerializable:
             # serialize all *Gegevens objects in a sequence
             for mdto_gegevens in field_value:
                 root_elem.append(mdto_gegevens.to_xml(field_name))
-        elif isinstance(field_value, XMLSerializable):
+        elif isinstance(field_value, Serializable):
             # serialize *Gegevens object
             root_elem.append(field_value.to_xml(field_name))
         else:
             # serialize primitive
             new_elem = ET.SubElement(root_elem, field_name)
-            # XML serialization can only happen on string values
             new_elem.text = str(field_value)
 
 
 @dataclass
-class IdentificatieGegevens(XMLSerializable):
+class IdentificatieGegevens(Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/identificatieGegevens
 
     Args:
@@ -111,7 +241,7 @@ class IdentificatieGegevens(XMLSerializable):
 
 
 @dataclass
-class VerwijzingGegevens(XMLSerializable):
+class VerwijzingGegevens(Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/verwijzingsGegevens
 
     Args:
@@ -119,18 +249,26 @@ class VerwijzingGegevens(XMLSerializable):
         verwijzingIdentificatie (Optional[IdentificatieGegevens]): Identificatie van object waarnaar verwezen wordt
     """
 
+    def validate(self):
+        """Warn about long names."""
+        super().validate()
+        if len(self.naam) > MDTO_MAX_NAAM_LENGTH:
+            logging.warning(
+                f"VerwijzingGegevens.verwijzingNaam: {self.naam} exceeds maximum length of {MDTO_MAX_NAAM_LENGTH}"
+            )
+
     verwijzingNaam: str
     verwijzingIdentificatie: IdentificatieGegevens = None
 
 
 @dataclass
-class BegripGegevens(XMLSerializable):
+class BegripGegevens(Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/begripGegevens
 
     Args:
-        begripLabel (str): De tekstweergave van het begrip dat is toegekend in de begrippenlijst
+        begripLabel (str): De tekstweergave van het begrip
         begripBegrippenlijst (VerwijzingGegevens): Verwijzing naar een beschrijving van de begrippen
-        begripCode (Optional[str]): De code die aan het begrip is toegekend in de begrippenlijst
+        begripCode (Optional[str]): De code die aan het begrip is toegekend
     """
 
     begripLabel: str
@@ -145,7 +283,7 @@ class BegripGegevens(XMLSerializable):
 
 
 @dataclass
-class TermijnGegevens(XMLSerializable):
+class TermijnGegevens(Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/termijnGegevens
 
     Args:
@@ -162,7 +300,7 @@ class TermijnGegevens(XMLSerializable):
 
 
 @dataclass
-class ChecksumGegevens(XMLSerializable):
+class ChecksumGegevens(Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/checksum
 
     Note:
@@ -178,13 +316,13 @@ class ChecksumGegevens(XMLSerializable):
         """Transform ChecksumGegevens into XML tree.
 
         Returns:
-             ET.Element: XML representation of object
+             ET.Element: XML representation
         """
         return super().to_xml(root)
 
 
 @dataclass
-class BeperkingGebruikGegevens(XMLSerializable):
+class BeperkingGebruikGegevens(Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/beperkingGebruik
 
     Args:
@@ -210,7 +348,7 @@ class BeperkingGebruikGegevens(XMLSerializable):
 
 
 @dataclass
-class DekkingInTijdGegevens(XMLSerializable):
+class DekkingInTijdGegevens(Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/dekkingInTijd
 
     Args:
@@ -228,7 +366,7 @@ class DekkingInTijdGegevens(XMLSerializable):
 
 
 @dataclass
-class EventGegevens(XMLSerializable):
+class EventGegevens(Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/event
 
     Args:
@@ -248,7 +386,7 @@ class EventGegevens(XMLSerializable):
 
 
 @dataclass
-class RaadpleeglocatieGegevens(XMLSerializable):
+class RaadpleeglocatieGegevens(Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/raadpleeglocatie
 
     Args:
@@ -259,34 +397,22 @@ class RaadpleeglocatieGegevens(XMLSerializable):
     raadpleeglocatieFysiek: VerwijzingGegevens | List[VerwijzingGegevens] = None
     raadpleeglocatieOnline: str | List[str] = None
 
+    def validate(self) -> None:
+        """Validate if `raadpleeglocatieOnline` is a RFC 3986 compliant URI"""
+        super().validate()
+        if not helpers.validate_url_or_urls(self.raadpleeglocatieOnline):
+            raise ValidationError(
+                # FIXME: maybe this path should be generated on the fly?
+                ["informatieobject", "raadpleeglocatie", "raadpleeglocatieOnline"],
+                f"url {self.raadpleeglocatieOnline} is malformed",
+            )
+
     def to_xml(self, root: str = "raadpleeglocatie"):
         return super().to_xml(root)
 
-    @property
-    def raadpleeglocatieOnline(self):
-        return self._raadpleeglocatieOnline
-
-    @raadpleeglocatieOnline.setter
-    def raadpleeglocatieOnline(self, url: str | List[str]):
-        """https://www.nationaalarchief.nl/archiveren/mdto/raadpleeglocatieOnline
-
-        Args:
-            url (str): any RFC 3986 compliant URI
-        """
-        # if url is not set, (e.g. when calling RaadpleegLocatieGegevens() without arguments)
-        # it will not be None, but rather an empty "property" object
-        if isinstance(url, property) or url is None:  # check if empty
-            self._raadpleeglocatieOnline = None
-        elif isinstance(url, list) and all(validators.url(u) for u in url):
-            self._raadpleeglocatieOnline = url
-        elif isinstance(url, str) and validators.url(url):
-            self._raadpleeglocatieOnline = url
-        else:
-            raise ValueError(f"URL '{url}' is malformed")
-
 
 @dataclass
-class GerelateerdInformatieobjectGegevens(XMLSerializable):
+class GerelateerdInformatieobjectGegevens(Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/gerelateerdInformatieobjectGegevens
 
     Args:
@@ -302,7 +428,7 @@ class GerelateerdInformatieobjectGegevens(XMLSerializable):
 
 
 @dataclass
-class BetrokkeneGegevens(XMLSerializable):
+class BetrokkeneGegevens(Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/betrokkeneGegevens
 
     Args:
@@ -318,7 +444,7 @@ class BetrokkeneGegevens(XMLSerializable):
 
 
 @dataclass
-class Object(XMLSerializable):
+class Object(Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/object
 
     This class serves as the parent class to Informatieobject and Bestand.
@@ -330,14 +456,6 @@ class Object(XMLSerializable):
 
     identificatie: IdentificatieGegevens | List[IdentificatieGegevens]
     naam: str
-
-    def __post_init__(self):
-        # check if name is of the right length
-        if len(self.naam) > MDTO_MAX_NAAM_LENGTH:
-            logging.warning(
-                f"value '{self.naam}' of property naam "
-                f"exceeds maximum length of {MDTO_MAX_NAAM_LENGTH}"
-            )
 
     def to_xml(self, root: str) -> ET.ElementTree:
         """Transform Object into an XML tree with the following structure:
@@ -378,6 +496,14 @@ class Object(XMLSerializable):
         ET.indent(tree, space="\t")
         return tree
 
+    def validate(self):
+        """Warn about long names."""
+        super().validate()
+        if len(self.naam) > MDTO_MAX_NAAM_LENGTH:
+            logging.warning(
+                f"{self.__class__.__name__}.naam: {self.naam} exceeds maximum length of {MDTO_MAX_NAAM_LENGTH}"
+            )
+
     # FIXME: change write mode to binary internally
     def save(
         self,
@@ -408,7 +534,7 @@ class Object(XMLSerializable):
 
 # TODO: place more restrictions on taal?
 @dataclass
-class Informatieobject(Object, XMLSerializable):
+class Informatieobject(Object, Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/informatieobject
 
     Example:
@@ -528,7 +654,7 @@ class Informatieobject(Object, XMLSerializable):
 
 
 @dataclass
-class Bestand(Object, XMLSerializable):
+class Bestand(Object, Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/bestand
 
     Note:
@@ -577,25 +703,14 @@ class Bestand(Object, XMLSerializable):
         """
         return super().to_xml("bestand")
 
-    @property
-    def URLBestand(self):
-        return self._URLBestand
-
-    @URLBestand.setter
-    def URLBestand(self, url: str):
-        """https://www.nationaalarchief.nl/archiveren/mdto/URLBestand
-
-        Args:
-            url (str): any RFC 3986 compliant URI
-        """
-        # if url is not set (e.g. when calling Bestand() without the URLBestand argument),
-        # it will not be None, but rather an empty "property" object
-        if isinstance(url, property) or url is None:  # check if empty
-            self._URLBestand = None
-        elif validators.url(url):
-            self._URLBestand = url
-        else:
-            raise ValueError(f"URL '{url} is malformed")
+    def validate(self) -> None:
+        """Validate if `URLBestand` is a RFC 3986 compliant URI"""
+        super().validate()
+        if not helpers.validate_url_or_urls(self.URLBestand):
+            raise ValidationError(
+                ["bestand", "URLBestand"],
+                f"url {self.URLBestand} is malformed",
+            )
 
 
 def _pronominfo_fido(file: str | Path) -> BegripGegevens:
