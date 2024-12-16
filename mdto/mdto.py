@@ -120,66 +120,6 @@ class Serializable:
         """
         return dataclasses.fields(self)
 
-    def validate(self) -> None:
-        """Validate the object's fields against the MDTO schema. Additional
-        validation logic can be incorporated by extending this method in a
-        subclass.
-
-        Note:
-           Typing information is infered based on type hints.
-
-        Raises:
-            ValidationError: field violates typing constraints of MDTO schema
-        """
-        for field in dataclasses.fields(self):
-            # breakpoint()
-            field_name = field.name
-            field_value = getattr(self, field_name)
-            field_type = field.type
-            optional_field = field.default is None
-            cls_name = self.__class__.__name__
-            _ValidationError = lambda m: ValidationError([cls_name, field_name], m)
-
-            # optional fields may be None/empty
-            if optional_field and not field_value:
-                continue
-
-            if not optional_field and not field_value:
-                raise _ValidationError("mandatory field cannot be empty or None")
-
-            # check if field is listable based on type hint
-            if get_origin(field_type) is Union:
-                expected_type = get_args(field_type)[0]
-                listable = True
-            else:
-                expected_type = field_type
-                listable = False
-
-            if isinstance(field_value, (list, tuple, set)):
-                if not listable:
-                    raise _ValidationError(
-                        f"got type {type(field_value).__name__}, but field does not accept sequences"
-                    )
-
-                if not all(isinstance(item, expected_type) for item in field_value):
-                    raise _ValidationError(
-                        f"list items must be {expected_type.__name__}, "
-                        f"but found {', '.join(set(type(i).__name__ for i in field_value))}"
-                    )
-            elif not isinstance(field_value, expected_type):
-                raise _ValidationError(
-                    f"expected type {expected_type.__name__}, got {type(field_value).__name__}"
-                )
-            elif isinstance(field_value, Serializable):
-                # catch errors recursively to reconstruct full field path in error message
-                try:
-                    field_value.validate()
-                except ValidationError as deeper_error:
-                    raise ValidationError(
-                        [cls_name, field_name] + deeper_error.field_path,
-                        deeper_error.msg,
-                    ) from None  # Suppress the original traceback
-
     def to_xml(self, root: str) -> ET.Element:
         """Transform dataclass to XML tree.
 
@@ -189,12 +129,12 @@ class Serializable:
         Returns:
             ET.Element: XML representation of object with new root tag
         """
+        # FIXME: this _super_ inefficient, as this entials nested recursive traversals
+        self.validate()
+
         root_elem = ET.Element(root)
         # get dataclass fields, but in the order required by the MDTO XSD
         fields = self._mdto_ordered_fields()
-
-        # TODO: add a call to yet-to-be-implemented .validate() method here
-        # This call will raise an error if the value(s) of field in a dataclass are not of the right type
 
         # process all fields in dataclass
         for field in fields:
