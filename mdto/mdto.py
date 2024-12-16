@@ -446,7 +446,6 @@ class Object(Serializable):
                 f"{self.__class__.__name__}.naam: {self.naam} exceeds maximum length of {MDTO_MAX_NAAM_LENGTH}"
             )
 
-    # FIXME: change write mode to binary internally
     def save(
         self,
         file_or_filename: str | TextIO,
