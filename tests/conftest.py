@@ -109,7 +109,7 @@ def voorbeeld_bestand_xml(mdto_example_files):
 
 @pytest.fixture
 def shared_informatieobject():
-    """A basic pre-constructed informatieobject"""
+    """A pre-constructed and valid informatieobject"""
     return Informatieobject(
         naam="Verlenen kapvergunning",
         identificatie=IdentificatieGegevens("abcd-1234", "Corsa (Geldermalsen)"),
@@ -130,5 +130,13 @@ def shared_informatieobject():
                     "Begrippenlijst Relatietypen (informatieobject) MDTO"
                 ),
             ),
+        ),
+        dekkingInTijd=DekkingInTijdGegevens(
+            BegripGegevens(
+                "Looptijd dossier",
+                VerwijzingGegevens("Begrippenlijst Events en Periode's Corsa"),
+            ),
+            dekkingInTijdBegindatum="1999",
+            dekkingInTijdEinddatum="2005",
         ),
     )
