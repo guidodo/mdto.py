@@ -31,13 +31,3 @@ def test_validate_url(shared_informatieobject):
         match=r"\w+(\.\w+)+:\s+url .* is malformed",
     ):
         shared_informatieobject.validate()
-
-
-# def test_validate_nonrepeatable_fields(shared_informatieobject):
-#     """Test cardinality check during validation"""
-#     shared_informatieobject.raadpleeglocatie = RaadpleeglocatieGegevens(
-#         VerwijzingGegevens(["Regionaal Archief Rivierenland", "RAR"])
-#     )
-
-#     with pytest.raises(ValidationError, match=r".+but field does not accept sequences"):
-#         shared_informatieobject.validate()
