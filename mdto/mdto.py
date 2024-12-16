@@ -455,10 +455,10 @@ class Object(Serializable):
             "encoding": "UTF-8",
         },
     ) -> None:
-        """Save object to an XML file.
+        """Save object to an XML file, provided it satifies the MDTO schema
 
         Args:
-            file_or_filename (str | TextIO): Path or file-object to write the object's XML representation to
+            file_or_filename (str | TextIO): Path or file-like object to write object's XML representation to
             lxml_args (Optional[dict]): Extra keyword arguments to pass to lxml's write() method.
               Defaults to `{xml_declaration=True, pretty_print=True, encoding="UTF-8"}`.
 
@@ -467,10 +467,10 @@ class Object(Serializable):
             https://lxml.de/apidoc/lxml.etree.html#lxml.etree._ElementTree.write
 
         Raises:
-            ValidationError: object is invalid MDTO
+            ValidationError: Raised when the object voilates the MDTO schema
         """
+        # lxml wants files in binary mode, so pass along a file's raw byte stream
         if hasattr(file_or_filename, "write"):
-            # "re-open" file in binary mode
             file_or_filename = file_or_filename.buffer.raw
 
         # validate before serialization to ensure correctness
