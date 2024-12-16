@@ -398,7 +398,7 @@ class RaadpleeglocatieGegevens(Serializable):
     raadpleeglocatieOnline: str | List[str] = None
 
     def validate(self) -> None:
-        """Validate if `raadpleeglocatieOnline` is a RFC 3986 compliant URI"""
+        """Check if raadpleeglocatieOnline is a RFC 3986 compliant URI."""
         super().validate()
         if not helpers.validate_url_or_urls(self.raadpleeglocatieOnline):
             raise ValidationError(
@@ -704,7 +704,7 @@ class Bestand(Object, Serializable):
         return super().to_xml("bestand")
 
     def validate(self) -> None:
-        """Validate if `URLBestand` is a RFC 3986 compliant URI"""
+        """Check if URLBestand is a RFC 3986 compliant URI"""
         super().validate()
         if not helpers.validate_url_or_urls(self.URLBestand):
             raise ValidationError(
