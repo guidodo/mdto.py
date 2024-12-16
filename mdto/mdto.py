@@ -252,7 +252,7 @@ class VerwijzingGegevens(Serializable):
     def validate(self):
         """Warn about long names."""
         super().validate()
-        if len(self.naam) > MDTO_MAX_NAAM_LENGTH:
+        if len(self.verwijzingNaam) > MDTO_MAX_NAAM_LENGTH:
             logging.warning(
                 f"VerwijzingGegevens.verwijzingNaam: {self.naam} exceeds maximum length of {MDTO_MAX_NAAM_LENGTH}"
             )
