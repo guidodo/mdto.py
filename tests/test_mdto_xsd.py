@@ -5,48 +5,17 @@ import mdto
 from mdto.gegevensgroepen import *
 
 
-def test_informatieobject_xml_validity(mdto_xsd):
+def test_informatieobject_xml_validity(mdto_xsd, shared_informatieobject):
     """Test if running to_xml() on a informatieobject procudes valid MDTO XML"""
     # create a schema object from the MDTO XSD
     mdto_schema = ET.XMLSchema(ET.parse(mdto_xsd))
-    # create informatieobject
-    informatieobject = Informatieobject(
-        naam="Verlenen kapvergunning",
-        identificatie=IdentificatieGegevens("abcd-1234", "Corsa (Geldermalsen)"),
-        archiefvormer=VerwijzingGegevens("Geldermalsen"),
-        beperkingGebruik=BeperkingGebruikGegevens(
-            BegripGegevens("nvt", VerwijzingGegevens("geen"))
-        ),
-        waardering=BegripGegevens(
-            "V", VerwijzingGegevens("Begrippenlijst Waarderingen MDTO")
-        ),
-        # These elements are added to increase test coverge
-        dekkingInTijd=DekkingInTijdGegevens(
-            BegripGegevens(
-                "Looptijd dossier",
-                VerwijzingGegevens("Begrippenlijst Events en Periode's Corsa"),
-            ),
-            dekkingInTijdBegindatum="1999",
-            dekkingInTijdEinddatum="2005",
-        ),
-        aanvullendeMetagegevens=VerwijzingGegevens("technische_beschieden.imro.xml"),
-        gerelateerdInformatieobject=GerelateerdInformatieobjectGegevens(
-            VerwijzingGegevens("Bestemmingsplan Hooigracht"),
-            BegripGegevens(
-                "Refereert aan",
-                VerwijzingGegevens(
-                    "Begrippenlijst Relatietypen (informatieobject) MDTO"
-                ),
-            ),
-        ),
-    )
 
     # lxml is silly, and does not bind namespaces to nodes until _after_ they've been serialized.
     # See: https://stackoverflow.com/questions/22535284/strange-lxml-behavior
     # As a workaround, we serialize the ElemenTree object to a string, and then deserialize this
     # namespaced string. There are other ways to fix this, but their decreased readability does not
     # outweigh mildly complicating this test.
-    informatieobject_xml = ET.fromstring(ET.tostring(informatieobject.to_xml()))
+    informatieobject_xml = ET.fromstring(ET.tostring(shared_informatieobject.to_xml()))
 
     # validate against schema
     # change to assertValid to see more detailed errors

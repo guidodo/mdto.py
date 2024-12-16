@@ -1,8 +1,11 @@
-import pytest
-import requests
 import zipfile
 from io import BytesIO
 from pathlib import Path
+
+import pytest
+import requests
+
+from mdto.gegevensgroepen import *
 
 xsd_filename = "MDTO-XML1.0.1.xsd"
 xsd_url = f"https://www.nationaalarchief.nl/mdto/{xsd_filename}"
@@ -102,3 +105,30 @@ def voorbeeld_serie_xml(mdto_example_files):
 @pytest.fixture
 def voorbeeld_bestand_xml(mdto_example_files):
     return mdto_example_files["Bestand.xml"]
+
+
+@pytest.fixture
+def shared_informatieobject():
+    """A basic pre-constructed informatieobject"""
+    return Informatieobject(
+        naam="Verlenen kapvergunning",
+        identificatie=IdentificatieGegevens("abcd-1234", "Corsa (Geldermalsen)"),
+        archiefvormer=VerwijzingGegevens("Geldermalsen"),
+        beperkingGebruik=BeperkingGebruikGegevens(
+            BegripGegevens("nvt", VerwijzingGegevens("geen"))
+        ),
+        waardering=BegripGegevens(
+            "V", VerwijzingGegevens("Begrippenlijst Waarderingen MDTO")
+        ),
+        # These elements are added to increase test coverge
+        aanvullendeMetagegevens=VerwijzingGegevens("technische_beschieden.imro.xml"),
+        gerelateerdInformatieobject=GerelateerdInformatieobjectGegevens(
+            VerwijzingGegevens("Bestemmingsplan Hooigracht"),
+            BegripGegevens(
+                "Refereert aan",
+                VerwijzingGegevens(
+                    "Begrippenlijst Relatietypen (informatieobject) MDTO"
+                ),
+            ),
+        ),
+    )
