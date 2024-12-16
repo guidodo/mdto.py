@@ -459,9 +459,7 @@ class Object(Serializable):
         """Save object to an XML file.
 
         Args:
-            file_or_filename (str | TextIO): Path or file-object to write the object's XML representation to.
-              If passing a file-like object, the file must be opened
-              in writeable binary mode (i.e. `wb`).
+            file_or_filename (str | TextIO): Path or file-object to write the object's XML representation to
             lxml_args (Optional[dict]): Extra keyword arguments to pass to lxml's write() method.
               Defaults to `{xml_declaration=True, pretty_print=True, encoding="UTF-8"}`.
 
@@ -472,6 +470,10 @@ class Object(Serializable):
         Raises:
             ValidationError: object is invalid MDTO
         """
+        if hasattr(file_or_filename, "write"):
+            # "re-open" file in binary mode
+            file_or_filename = file_or_filename.buffer.raw
+
         # validate before serialization to ensure correctness
         # (doing this in to_xml would be slow, and perhaps unexpected)
         self.validate()
