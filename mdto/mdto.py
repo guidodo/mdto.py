@@ -129,9 +129,6 @@ class Serializable:
         Returns:
             ET.Element: XML representation of object with new root tag
         """
-        # FIXME: this _super_ inefficient, as this entials nested recursive traversals
-        self.validate()
-
         root_elem = ET.Element(root)
         # get dataclass fields, but in the order required by the MDTO XSD
         fields = self._mdto_ordered_fields()
@@ -471,7 +468,13 @@ class Object(Serializable):
         Note:
             For a complete list of options for lxml's write method, see
             https://lxml.de/apidoc/lxml.etree.html#lxml.etree._ElementTree.write
+
+        Raises:
+            ValidationError: object is invalid MDTO
         """
+        # validate before serialization to ensure correctness
+        # (doing this in to_xml would be slow, and perhaps unexpected)
+        self.validate()
 
         xml = self.to_xml()
         xml.write(file_or_filename, **lxml_args)
