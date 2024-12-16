@@ -455,7 +455,7 @@ class Object(Serializable):
             "encoding": "UTF-8",
         },
     ) -> None:
-        """Save object to an XML file, provided it satifies the MDTO schema
+        """Save object to an XML file, provided it satifies the MDTO schema.
 
         Args:
             file_or_filename (str | TextIO): Path or file-like object to write object's XML representation to
