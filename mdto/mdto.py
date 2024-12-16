@@ -403,7 +403,12 @@ class RaadpleeglocatieGegevens(Serializable):
         if not helpers.validate_url_or_urls(self.raadpleeglocatieOnline):
             raise ValidationError(
                 # FIXME: maybe this path should be generated on the fly?
-                ["informatieobject", "raadpleeglocatie", "raadpleeglocatieOnline"],
+                [
+                    "informatieobject",
+                    "raadpleeglocatie",
+                    "RaadpleeglocatieGegevens",
+                    "raadpleeglocatieOnline",
+                ],
                 f"url {self.raadpleeglocatieOnline} is malformed",
             )
 
