@@ -790,9 +790,7 @@ def _pronominfo_siegfried(file: str | Path) -> BegripGegevens:
     # log sf's warnings (such as extension mismatches)
     warning = match["warning"]
     if warning:
-        logging.warning(
-            f"siegfried reports PRONOM warning about {file}: {warning}"
-        )
+        logging.warning(f"siegfried reports PRONOM warning about {file}: {warning}")
 
     return BegripGegevens(
         begripLabel=match["format"],
