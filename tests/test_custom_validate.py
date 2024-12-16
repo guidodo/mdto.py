@@ -1,0 +1,43 @@
+import pytest
+
+from mdto.gegevensgroepen import *
+from mdto import ValidationError
+
+
+def test_validate_recursive(shared_informatieobject):
+    """Test validation in deeply nested structure."""
+    shared_informatieobject.bewaartermijn = TermijnGegevens(
+        termijnTriggerStartLooptijd=BegripGegevens(
+            "V",
+            # IdentificatieGegevens is the incorrect child
+            IdentificatieGegevens("nvt", "nvt"),
+        )
+    )
+
+    with pytest.raises(
+        ValidationError, match=r"\w+(\.\w+)+:\s+expected type \w+, got \w+"
+    ):
+        shared_informatieobject.validate()
+
+
+def test_validate_url(shared_informatieobject):
+    """Test URL validation."""
+    shared_informatieobject.raadpleeglocatie = RaadpleeglocatieGegevens(
+        raadpleeglocatieOnline="hppts://www.example.com"  # misspelling
+    )
+
+    with pytest.raises(
+        ValidationError,
+        match=r"\w+(\.\w+)+:\s+url .* is malformed",
+    ):
+        shared_informatieobject.validate()
+
+
+# def test_validate_nonrepeatable_fields(shared_informatieobject):
+#     """Test cardinality check during validation"""
+#     shared_informatieobject.raadpleeglocatie = RaadpleeglocatieGegevens(
+#         VerwijzingGegevens(["Regionaal Archief Rivierenland", "RAR"])
+#     )
+
+#     with pytest.raises(ValidationError, match=r".+but field does not accept sequences"):
+#         shared_informatieobject.validate()
