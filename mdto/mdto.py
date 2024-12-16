@@ -10,10 +10,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, List, TextIO
 
+# allow running mdto.py directly from interpreter:
 try:
-    from . import helpers  # Package context
+    from . import helpers
 except ImportError:
-    import helpers  # Direct execution
+    import helpers
 
 import lxml.etree as ET
 import validators
