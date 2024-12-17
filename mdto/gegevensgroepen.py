@@ -1,4 +1,4 @@
-from .mdto import (
+from .classes import (
     IdentificatieGegevens,
     VerwijzingGegevens,
     BegripGegevens,
@@ -14,7 +14,7 @@ from .mdto import (
     Bestand,
 )
 
-# Expose desired classes
+# Expose public classes
 __all__ = [
     "IdentificatieGegevens",
     "VerwijzingGegevens",

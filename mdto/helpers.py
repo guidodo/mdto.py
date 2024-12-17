@@ -1,8 +1,19 @@
 # Private helper methods
 from pathlib import Path
 from typing import List, TextIO
+import logging
 
 import validators
+
+# setup logging
+logging.basicConfig(
+    format="[%(asctime)s] %(levelname)s: %(message)s", datefmt="%H:%M:%S"
+)
+logging.addLevelName(
+    # colorize warning messages
+    logging.WARNING,
+    "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.WARNING),
+)
 
 
 def process_file(file_or_filename) -> TextIO:

@@ -1,6 +1,7 @@
 import pytest
-import mdto
+
 from mdto.gegevensgroepen import *
+from mdto.utilities import _pronominfo_fido, _pronominfo_siegfried
 
 
 def test_pronom_siegfried(voorbeeld_archiefstuk_xml):
@@ -8,7 +9,7 @@ def test_pronom_siegfried(voorbeeld_archiefstuk_xml):
     expected = BegripGegevens(
         "Extensible Markup Language", VerwijzingGegevens("PRONOM-register"), "fmt/101"
     )
-    got = mdto._pronominfo_siegfried(voorbeeld_archiefstuk_xml)
+    got = _pronominfo_siegfried(voorbeeld_archiefstuk_xml)
     assert expected == got
 
 
@@ -17,5 +18,5 @@ def test_pronom_fido(voorbeeld_archiefstuk_xml):
     expected = BegripGegevens(
         "Extensible Markup Language", VerwijzingGegevens("PRONOM-register"), "fmt/101"
     )
-    got = mdto._pronominfo_fido(voorbeeld_archiefstuk_xml)
+    got = _pronominfo_fido(voorbeeld_archiefstuk_xml)
     assert expected == got
