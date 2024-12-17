@@ -65,6 +65,7 @@ class Serializable:
             field_value = getattr(self, field_name)
             field_type = field.type
             optional_field = field.default is None
+
             cls_name = self.__class__.__name__
             _ValidationError = lambda m: ValidationError([cls_name, field_name], m)
 
@@ -146,7 +147,8 @@ class Serializable:
     def _process_dataclass_field(
         self, root_elem: ET.Element, field_name: str, field_value: Any
     ):
-        """Recursively process a dataclass field, and append its XML representation to `root_elem`."""
+        """Recursively process a dataclass field, and append its XML
+        representation to `root_elem`."""
 
         if field_value is None:
             # skip empty fields
@@ -241,8 +243,9 @@ class ChecksumGegevens(Serializable):
     """https://www.nationaalarchief.nl/archiveren/mdto/checksum
 
     Note:
-        When building Bestand objects, it's recommended to call the convience function `bestand_from_file()`.
-        And if you just need to update a Bestand object's checksum, you should use `create_checksum()`.
+        When building Bestand objects, it's recommended to call the convience
+        function `bestand_from_file()` instead.  And if you just need to update
+        a Bestand object's checksum, you should use `create_checksum()`.
     """
 
     checksumAlgoritme: BegripGegevens
@@ -817,15 +820,16 @@ def pronominfo(file: str | Path) -> BegripGegevens:
 
 
 def _detect_verwijzing(informatieobject: TextIO | str) -> VerwijzingGegevens:
-    """A Bestand object must contain a reference to a corresponding informatieobject.
-    Specifically, it expects an <isRepresentatieVan> tag with the following children:
+    """A Bestand object must contain a reference to a corresponding
+    informatieobject.  Specifically, it expects an <isRepresentatieVan> tag with
+    the following children:
 
     1. <verwijzingNaam>: name of the informatieobject
-    2. <verwijzingIdentificatie> (optional): reference to the
-    informatieobject's ID and source thereof
+    2. <verwijzingIdentificatie> (optional): reference to the informatieobject's
+    ID and source thereof
 
-    This function infers these so-called 'VerwijzingGegevens' by
-    parsing the XML of the file `informatieobject`.
+    This function infers these so-called 'VerwijzingGegevens' by parsing the XML
+    of the file `informatieobject`.
 
     Args:
         informatieobject (TextIO | str): XML file to infer VerwijzingGegevens from
@@ -862,29 +866,33 @@ def bestand_from_file(
     isrepresentatievan: VerwijzingGegevens | TextIO | str,
     url: str = None,
 ) -> Bestand:
-    """Convenience function for creating a Bestand object from a file. The difference
-    between this function and calling Bestand() directly is that this function infers
-    most Bestand-related information for you (checksum, name, and so on), based on
-    the characteristics of `file`. The value of <naam>, for example, is always set to the
-    basename of `file`.
+    """Convenience function for creating a Bestand object from a file.
+
+    This function differs from calling Bestand() directly in that it
+    infers most technical information for you (checksum, PRONOM info,
+    etc.) by inspecting `file`. The value of <naam>, for example, is
+    always set to the basename of `file`.
 
 
     Args:
-      file (TextIO | str): the file the Bestand object represents
-      identificatie (IdentificatieGegevens | List[IdentificatieGegevens]): identificatiekenmerk of
-        Bestand object
-      isrepresentatievan (TextIO | str | VerwijzingGegevens): a XML file that contains an
-        an informatieobject, or a VerwijzingGegevens object referencing an informatieobject.
-        Used to construct the values for <isRepresentatieVan>.
-      url (Optional[str]): value of <URLBestand>
+        file (TextIO | str): the file the Bestand object represents
+        identificatie (IdentificatieGegevens | List[IdentificatieGegevens]): identificatiekenmerk of
+          Bestand object
+        isrepresentatievan (TextIO | str | VerwijzingGegevens): a XML
+          file containing an informatieobject, or a
+          VerwijzingGegevens referencing an informatieobject.
+          Used to construct the values for <isRepresentatieVan>.
+        url (Optional[str]): value of <URLBestand>
 
     Example:
       ```python
 
-      with open('informatieobject_001.xml') as f:
-          bestand = mdto.bestand_from_file("vergunning.pdf",
-                                   IdentificatieGegevens('34c5-4379-9f1a-5c378', 'Proza (DMS)'),
-                                   informatieobject=f)
+     verwijzing_obj = VerwijzingGegevens("vergunning.mdto.xml")
+     bestand = mdto.bestand_from_file(
+          "vergunning.pdf",
+          IdentificatieGegevens('34c5-4379-9f1a-5c378', 'Proza (DMS)'),
+          isrepresentatievan=verwijzing_obj  # or pass the actual file
+     )
      bestand.save("vergunning.bestand.mdto.xml")
       ```
 
@@ -958,7 +966,6 @@ def create_checksum(
     )
 
     # file_digest() expects a file in binary mode, hence `infile.buffer.raw`
-    # FIXME: this value is not the same on each call?
     checksumWaarde = hashlib.file_digest(infile.buffer.raw, algorithm).hexdigest()
 
     checksumDatum = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")

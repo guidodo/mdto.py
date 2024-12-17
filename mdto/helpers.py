@@ -33,7 +33,7 @@ def process_file(file_or_filename) -> TextIO:
 
 
 def validate_url_or_urls(url: str | List[str]) -> bool:
-    """Checks if URL(s) are RFC 3986 compliant URIs
+    """Checks if URL(s) are RFC 3986 compliant URIs.
 
     Args:
         url (str | List[str]): URL or URLs to check
