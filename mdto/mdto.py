@@ -191,7 +191,7 @@ class VerwijzingGegevens(Serializable):
         super().validate()
         if len(self.verwijzingNaam) > MDTO_MAX_NAAM_LENGTH:
             logging.warning(
-                f"VerwijzingGegevens.verwijzingNaam: {self.verwijzingNaam} exceeds maximum length of {MDTO_MAX_NAAM_LENGTH}"
+                f"VerwijzingGegevens.verwijzingNaam: {self.verwijzingNaam} exceeds recommended length of {MDTO_MAX_NAAM_LENGTH}"
             )
 
     verwijzingNaam: str
@@ -443,7 +443,7 @@ class Object(Serializable):
         super().validate()
         if len(self.naam) > MDTO_MAX_NAAM_LENGTH:
             logging.warning(
-                f"{self.__class__.__name__}.naam: {self.naam} exceeds maximum length of {MDTO_MAX_NAAM_LENGTH}"
+                f"{self.__class__.__name__}.naam: {self.naam} exceeds recommended length of {MDTO_MAX_NAAM_LENGTH}"
             )
 
     def save(
