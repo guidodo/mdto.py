@@ -191,7 +191,7 @@ class VerwijzingGegevens(Serializable):
         super().validate()
         if len(self.verwijzingNaam) > MDTO_MAX_NAAM_LENGTH:
             logging.warning(
-                f"VerwijzingGegevens.verwijzingNaam: {self.naam} exceeds maximum length of {MDTO_MAX_NAAM_LENGTH}"
+                f"VerwijzingGegevens.verwijzingNaam: {self.verwijzingNaam} exceeds maximum length of {MDTO_MAX_NAAM_LENGTH}"
             )
 
     verwijzingNaam: str
