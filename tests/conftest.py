@@ -120,7 +120,7 @@ def shared_informatieobject():
         waardering=BegripGegevens(
             "V", VerwijzingGegevens("Begrippenlijst Waarderingen MDTO")
         ),
-        # These elements are added to increase test coverge
+        # These elements are added to increase test coverage
         aanvullendeMetagegevens=VerwijzingGegevens("technische_beschieden.imro.xml"),
         gerelateerdInformatieobject=GerelateerdInformatieobjectGegevens(
             VerwijzingGegevens("Bestemmingsplan Hooigracht"),
