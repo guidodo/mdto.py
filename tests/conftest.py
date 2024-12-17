@@ -109,7 +109,7 @@ def voorbeeld_bestand_xml(mdto_example_files):
 
 @pytest.fixture
 def shared_informatieobject():
-    """A pre-constructed and valid informatieobject"""
+    """A pre-constructed valid informatieobject"""
     return Informatieobject(
         naam="Verlenen kapvergunning",
         identificatie=IdentificatieGegevens("abcd-1234", "Corsa (Geldermalsen)"),
