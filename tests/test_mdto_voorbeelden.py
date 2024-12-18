@@ -99,7 +99,6 @@ def test_serialization_chain_bestand(voorbeeld_bestand_xml):
 
 def test_file_saving(voorbeeld_archiefstuk_xml, tmp_path_factory):
     """Test if `save()` produces byte-for-byte equivalent XML from archiefstuk example"""
-
     # location to write to
     tmpdir = tmp_path_factory.mktemp("Output")
     outfile = tmpdir / "test archiefstuk.xml"
