@@ -492,12 +492,12 @@ class Informatieobject(Object, Serializable):
         raadpleeglocatie(Optional[RaadpleeglocatieGegevens | List[RaadpleeglocatieGegevens]]): Raadpleeglocatie
         dekkingInTijd (Optional[DekkingInTijdGegevens | List[DekkingInTijdGegevens]]): Betreffende periode/tijdstip
         dekkingInRuimte (Optional[VerwijzingGegevens | List[VerwijzingGegevens]]): Betreffende plaats/locatie
-        taal (Optional[str]): Taal van het object
+        taal (Optional[str | List[str]]): Taal van het object
         event (Optional[EventGegevens | List[EventGegevens]]): Gerelateerde gebeurtenis
         bewaartermijn (Optional[TermijnGegevens]): Termijn waarin het object bewaard dient te worden
         informatiecategorie (Optional[BegripGegevens]): Informatiecategorie waar de bewaartermijn op gebaseerd is
-        isOnderdeelVan (Optional[VerwijzingGegevens | List[VerwijzingGegevens]]): Bovenliggende aggregatie
-        bevatOnderdeel (Optional[VerwijzingGegevens | List[VerwijzingGegevens]]): Direct onderliggend object
+        isOnderdeelVan (Optional[VerwijzingGegevens | List[VerwijzingGegevens]]): Bovenliggend object
+        bevatOnderdeel (Optional[VerwijzingGegevens | List[VerwijzingGegevens]]): Onderliggend object
         heeftRepresentatie (Optional[VerwijzingGegevens | List[VerwijzingGegevens]]): Bijbehorend Bestand object
         aanvullendeMetagegevens (Optional[VerwijzingGegevens | List[VerwijzingGegevens]]): Aanvullende metagegevens
         gerelateerdInformatieobject (Optional[GerelateerdInformatieobjectGegevens | List[GerelateerdInformatieobjectGegevens]]): Gerelateerd object
