@@ -13,7 +13,7 @@ import lxml.etree as ET
 
 # globals
 MDTO_MAX_NAAM_LENGTH = 80
-
+MDTO_NS = "https://www.nationaalarchief.nl/mdto"
 
 class ValidationError(TypeError):
     """Custom formatter for MDTO validation errors"""
@@ -117,7 +117,7 @@ class Serializable:
         Returns:
             ET.Element: XML representation of object with new root tag
         """
-        root_elem = ET.Element(root)
+        root_elem = ET.Element( "{{{ns}}}{elem}".format( ns=MDTO_NS, elem=root), nsmap={ None: MDTO_NS } )
         # get dataclass fields, but in the order required by the MDTO XSD
         fields = self._mdto_ordered_fields()
 
@@ -179,7 +179,7 @@ class Serializable:
             for mdto_gegevens in field_value:
                 if isinstance(mdto_gegevens, str):
                     # serialize lists of primitives
-                    new_elem = ET.SubElement(root_elem, field_name)
+                    new_elem = ET.SubElement(root_elem, "{{{ns}}}{elem}".format( ns=MDTO_NS, elem=field_name))
                     new_elem.text = str(mdto_gegevens)
                 else:                
                     root_elem.append(mdto_gegevens.to_xml(field_name))
@@ -188,7 +188,7 @@ class Serializable:
             root_elem.append(field_value.to_xml(field_name))
         else:
             # serialize primitive
-            new_elem = ET.SubElement(root_elem, field_name)
+            new_elem = ET.SubElement(root_elem, "{{{ns}}}{elem}".format( ns=MDTO_NS, elem=field_name))
             new_elem.text = str(field_value)
 
 
@@ -445,12 +445,12 @@ class Object(Serializable):
         # construct attributes of <MDTO>
         xsi_ns = "http://www.w3.org/2001/XMLSchema-instance"
         nsmap = {
-            None: "https://www.nationaalarchief.nl/mdto",  # default namespace (i.e. xmlns=https...)
+            None: MDTO_NS,  # default namespace (i.e. xmlns=https...)
             "xsi": xsi_ns,
         }
 
         # create <MDTO>
-        mdto = ET.Element("MDTO", nsmap=nsmap)
+        mdto = ET.Element("{{{ns}}}{elem}".format( ns=MDTO_NS, elem="MDTO"), nsmap=nsmap)
 
         # set schemaLocation attribute of <MDTO>
         mdto.set(
