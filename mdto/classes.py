@@ -137,7 +137,12 @@ class Serializable:
         elif isinstance(field_value, (list, tuple, set)):
             # serialize all *Gegevens objects in a sequence
             for mdto_gegevens in field_value:
-                root_elem.append(mdto_gegevens.to_xml(field_name))
+                if isinstance(mdto_gegevens, str):
+                    # serialize lists of primitives
+                    new_elem = ET.SubElement(root_elem, field_name)
+                    new_elem.text = str(mdto_gegevens)
+                else:
+                    root_elem.append(mdto_gegevens.to_xml(field_name))
         elif isinstance(field_value, Serializable):
             # serialize *Gegevens object
             root_elem.append(field_value.to_xml(field_name))
@@ -513,11 +518,11 @@ class Informatieobject(Object, Serializable):
     aggregatieniveau: BegripGegevens = None
     classificatie: BegripGegevens | List[BegripGegevens] = None
     trefwoord: str | List[str] = None
-    omschrijving: str = None
+    omschrijving: str | List[str] = None
     raadpleeglocatie: RaadpleeglocatieGegevens | List[RaadpleeglocatieGegevens] = None
     dekkingInTijd: DekkingInTijdGegevens | List[DekkingInTijdGegevens] = None
     dekkingInRuimte: VerwijzingGegevens | List[VerwijzingGegevens] = None
-    taal: str = None
+    taal: str | List[str] = None
     event: EventGegevens | List[EventGegevens] = None
     bewaartermijn: TermijnGegevens = None
     informatiecategorie: BegripGegevens = None
