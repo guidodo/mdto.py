@@ -30,6 +30,12 @@ class Serializable:
     """Provides is_valid() and to_xml() methods for converting MDTO dataclasses
     to valid MDTO XML."""
 
+    DEFAULT_LXML_ARGS: dict = {
+            "xml_declaration": True,
+            "pretty_print": True,
+            "encoding": "UTF-8",
+        }
+
     def validate(self) -> None:
         """Validate the object's fields against the MDTO schema. Additional
         validation logic can be incorporated by extending this method in a
@@ -124,6 +130,40 @@ class Serializable:
 
         # return the tree
         return root_elem
+
+    def to_bytes(self, lxml_args: dict = None) -> bytes:
+        """Returns object as a XML bytes, provided it satifies the MDTO schema.
+
+        Args:
+            lxml_args (Optional[dict]): Extra keyword arguments to pass to lxml's write() method.
+              Defaults to `{xml_declaration=True, pretty_print=True, encoding="UTF-8"}`.
+
+        Raises:
+            ValidationError: Raised when the object violates the MDTO schema
+        """
+
+        self.validate()
+
+        if lxml_args is None:
+            lxml_args = self.DEFAULT_LXML_ARGS
+
+        return ET.tostring(self.to_xml(), **lxml_args)
+
+    def to_string(self, lxml_args: dict = None) -> str:
+        """Returns object as a XML string, provided it satifies the MDTO schema.
+
+        Args:
+            lxml_args (Optional[dict]): Extra keyword arguments to pass to lxml's tostring()/write() method.
+              Defaults to `{xml_declaration=True, pretty_print=True, encoding="UTF-8"}`.
+
+        Raises:
+            ValidationError: Raised when the object violates the MDTO schema
+        """
+
+        if lxml_args is None:
+            lxml_args = self.DEFAULT_LXML_ARGS
+
+        return self.to_bytes(lxml_args).decode(lxml_args.get("encoding", "UTF-8"))
 
     def _process_dataclass_field(
         self, root_elem: ET.Element, field_name: str, field_value: Any
@@ -438,11 +478,7 @@ class Object(Serializable):
     def save(
         self,
         file_or_filename: str | BinaryIO,
-        lxml_args: dict = {
-            "xml_declaration": True,
-            "pretty_print": True,
-            "encoding": "UTF-8",
-        },
+        lxml_args: dict = None,
     ) -> None:
         """Save object to an XML file, provided it satifies the MDTO schema.
 
@@ -466,43 +502,11 @@ class Object(Serializable):
         # (doing this in to_xml would be slow, and perhaps unexpected)
         self.validate()
 
+        if lxml_args is None:
+            lxml_args = self.DEFAULT_LXML_ARGS
+
         xml = self.to_xml()
         xml.write(file_or_filename, **lxml_args)
-
-    def to_bytes(self, **kwargs) -> bytes:
-        """Returns object as a XML bytes, provided it satifies the MDTO schema.
-
-        Args:
-            lxml_args (Optional[dict]): Extra keyword arguments to pass to lxml's write() method.
-
-        Raises:
-            ValidationError: Raised when the object violates the MDTO schema
-        """
-
-        # This could also be done using 'ET.tostring(self.to_xml(), **lxml_args)'
-        # As the validation and default values are handled by self.save(), we take this route
-        with BytesIO() as xml:
-            self.save(xml, **kwargs)
-            xml.seek(0)
-            return xml.read()
-
-    def to_string(self, **kwargs) -> str:
-        """Returns object as a XML string, provided it satifies the MDTO schema.
-
-        Args:
-            lxml_args (Optional[dict]): Extra keyword arguments to pass to lxml's write() method.
-
-        Raises:
-            ValidationError: Raised when the object violates the MDTO schema
-        """
-
-        if "lxml_args" in kwargs and "encoding" in kwargs["lxml_args"]:
-            encoding = kwargs["lxml_args"]["encoding"]
-        else:
-            encoding = "UTF-8"
-
-        return self.to_bytes(**kwargs).decode(encoding)
-
 
 # TODO: place more restrictions on taal?
 @dataclass
