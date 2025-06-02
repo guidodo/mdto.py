@@ -1,6 +1,7 @@
 import dataclasses
 from dataclasses import dataclass
-from typing import Any, List, TextIO, Union, get_args, get_origin
+from typing import Any, List, BinaryIO, Union, get_args, get_origin
+from io import BufferedIOBase, BytesIO
 
 # allow running directly from interpreter:
 try:
@@ -140,7 +141,7 @@ class Serializable:
                     # serialize lists of primitives
                     new_elem = ET.SubElement(root_elem, field_name)
                     new_elem.text = str(mdto_gegevens)
-                else:
+                else:                
                     root_elem.append(mdto_gegevens.to_xml(field_name))
         elif isinstance(field_value, Serializable):
             # serialize *Gegevens object
@@ -436,7 +437,7 @@ class Object(Serializable):
 
     def save(
         self,
-        file_or_filename: str | TextIO,
+        file_or_filename: str | BinaryIO,
         lxml_args: dict = {
             "xml_declaration": True,
             "pretty_print": True,
@@ -446,7 +447,7 @@ class Object(Serializable):
         """Save object to an XML file, provided it satifies the MDTO schema.
 
         Args:
-            file_or_filename (str | TextIO): Path or file-like object to write object's XML representation to
+            file_or_filename (str | BinaryIO): Path or file-like object to write object's XML representation to
             lxml_args (Optional[dict]): Extra keyword arguments to pass to lxml's write() method.
               Defaults to `{xml_declaration=True, pretty_print=True, encoding="UTF-8"}`.
 
@@ -455,10 +456,10 @@ class Object(Serializable):
             https://lxml.de/apidoc/lxml.etree.html#lxml.etree._ElementTree.write
 
         Raises:
-            ValidationError: Raised when the object voilates the MDTO schema
+            ValidationError: Raised when the object violates the MDTO schema
         """
         # lxml wants files in binary mode, so pass along a file's raw byte stream
-        if hasattr(file_or_filename, "write"):
+        if hasattr(file_or_filename, "write") and not(isinstance(file_or_filename, BufferedIOBase)):
             file_or_filename = file_or_filename.buffer.raw
 
         # validate before serialization to ensure correctness
@@ -467,6 +468,40 @@ class Object(Serializable):
 
         xml = self.to_xml()
         xml.write(file_or_filename, **lxml_args)
+
+    def to_bytes(self, **kwargs) -> bytes:
+        """Returns object as a XML bytes, provided it satifies the MDTO schema.
+
+        Args:
+            lxml_args (Optional[dict]): Extra keyword arguments to pass to lxml's write() method.
+
+        Raises:
+            ValidationError: Raised when the object violates the MDTO schema
+        """
+
+        # This could also be done using 'ET.tostring(self.to_xml(), **lxml_args)'
+        # As the validation and default values are handled by self.save(), we take this route
+        with BytesIO() as xml:
+            self.save(xml, **kwargs)
+            xml.seek(0)
+            return xml.read()
+
+    def to_string(self, **kwargs) -> str:
+        """Returns object as a XML string, provided it satifies the MDTO schema.
+
+        Args:
+            lxml_args (Optional[dict]): Extra keyword arguments to pass to lxml's write() method.
+
+        Raises:
+            ValidationError: Raised when the object violates the MDTO schema
+        """
+
+        if "lxml_args" in kwargs and "encoding" in kwargs["lxml_args"]:
+            encoding = kwargs["lxml_args"]["encoding"]
+        else:
+            encoding = "UTF-8"
+
+        return self.to_bytes(**kwargs).decode(encoding)
 
 
 # TODO: place more restrictions on taal?
