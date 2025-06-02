@@ -328,7 +328,7 @@ def from_xml(mdto_xml: TextIO | str) -> Informatieobject | Bestand:
     """Construct a Informatieobject/Bestand object from a MDTO XML file.
 
     Note:
-        When `mdto_xml` is invalid MDTO, this function will probably throw an error.
+        If `mdto_xml` is invalid MDTO, this function will probably throw an error.
 
     Example:
 
@@ -390,7 +390,7 @@ def from_xml(mdto_xml: TextIO | str) -> Informatieobject | Bestand:
             mdto_field = child.tag.removeprefix(
                 "{https://www.nationaalarchief.nl/mdto}"
             )
-            # retrieve parser
+            # retrieve correct parser
             xml_parser = mdto_xml_parsers[mdto_field]
             # add value of parsed child element to class constructor args
             constructor_args[mdto_field].append(xml_parser(child))
