@@ -1,4 +1,3 @@
-
 import dataclasses
 from dataclasses import dataclass
 from typing import Any, List, TextIO, Union, get_args, get_origin
@@ -131,25 +130,21 @@ class Serializable:
         """Recursively process a dataclass field, and append its XML
         representation to `root_elem`."""
 
+        # skip empty fields
         if field_value is None:
-            # skip empty fields
             return
-        elif isinstance(field_value, (list, tuple, set)):
-            # serialize all *Gegevens objects in a sequence
-            for mdto_gegevens in field_value:
-                if isinstance(mdto_gegevens, str):
-                    # serialize lists of primitives
-                    new_elem = ET.SubElement(root_elem, field_name)
-                    new_elem.text = str(mdto_gegevens)
-                else:
-                    root_elem.append(mdto_gegevens.to_xml(field_name))
-        elif isinstance(field_value, Serializable):
-            # serialize *Gegevens object
-            root_elem.append(field_value.to_xml(field_name))
-        else:
-            # serialize primitive
-            new_elem = ET.SubElement(root_elem, field_name)
-            new_elem.text = str(field_value)
+
+        # convert field_value to an iterable (if not already)
+        if not isinstance(field_value, (list, tuple, set)):
+            field_value = (field_value,)
+
+        # serialize sequence of primitives or *Gegevens objects
+        for val in field_value:
+            if isinstance(val, Serializable):
+                root_elem.append(val.to_xml(field_name))
+            else:
+                new_sub_elem = ET.SubElement(root_elem, field_name)
+                new_sub_elem.text = str(val)
 
 
 @dataclass
