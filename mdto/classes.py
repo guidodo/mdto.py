@@ -14,6 +14,11 @@ import lxml.etree as ET
 # globals
 MDTO_MAX_NAAM_LENGTH = 80
 MDTO_NS = "https://www.nationaalarchief.nl/mdto"
+DEFAULT_LXML_ARGS: dict = {
+    "xml_declaration": True,
+    "pretty_print": True,
+    "encoding": "UTF-8",
+}
 
 class ValidationError(TypeError):
     """Custom formatter for MDTO validation errors"""
@@ -29,12 +34,6 @@ class ValidationError(TypeError):
 class Serializable:
     """Provides is_valid() and to_xml() methods for converting MDTO dataclasses
     to valid MDTO XML."""
-
-    DEFAULT_LXML_ARGS: dict = {
-            "xml_declaration": True,
-            "pretty_print": True,
-            "encoding": "UTF-8",
-        }
 
     def validate(self) -> None:
         """Validate the object's fields against the MDTO schema. Additional
@@ -131,7 +130,7 @@ class Serializable:
         # return the tree
         return root_elem
 
-    def to_bytes(self, lxml_args: dict = None) -> bytes:
+    def to_bytes(self, lxml_args: dict = DEFAULT_LXML_ARGS) -> bytes:
         """Returns object as a XML bytes, provided it satifies the MDTO schema.
 
         Args:
@@ -143,13 +142,9 @@ class Serializable:
         """
 
         self.validate()
-
-        if lxml_args is None:
-            lxml_args = self.DEFAULT_LXML_ARGS
-
         return ET.tostring(self.to_xml(), **lxml_args)
 
-    def to_string(self, lxml_args: dict = None) -> str:
+    def to_string(self, lxml_args: dict = DEFAULT_LXML_ARGS) -> str:
         """Returns object as a XML string, provided it satifies the MDTO schema.
 
         Args:
@@ -159,9 +154,6 @@ class Serializable:
         Raises:
             ValidationError: Raised when the object violates the MDTO schema
         """
-
-        if lxml_args is None:
-            lxml_args = self.DEFAULT_LXML_ARGS
 
         return self.to_bytes(lxml_args).decode(lxml_args.get("encoding", "UTF-8"))
 
@@ -473,7 +465,7 @@ class Object(Serializable):
     def save(
         self,
         file_or_filename: str | BinaryIO,
-        lxml_args: dict = None,
+        lxml_args: dict = DEFAULT_LXML_ARGS,
     ) -> None:
         """Save object to an XML file, provided it satifies the MDTO schema.
 
@@ -496,9 +488,6 @@ class Object(Serializable):
         # validate before serialization to ensure correctness
         # (doing this in to_xml would be slow, and perhaps unexpected)
         self.validate()
-
-        if lxml_args is None:
-            lxml_args = self.DEFAULT_LXML_ARGS
 
         xml = self.to_xml()
         xml.write(file_or_filename, **lxml_args)
