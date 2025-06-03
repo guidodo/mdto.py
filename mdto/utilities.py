@@ -313,7 +313,7 @@ def create_checksum(
     )
 
     # normalize algorithm name; i.e. uppercase it and insert a dash, like the NA
-    algorithm_norm = re.sub(r"(SHA)(\d+)", r"\1-\2", algorithm.upper())
+    algorithm_norm = re.sub(r"SHA(\d+)", r"SHA-\1", algorithm.upper())
     checksumAlgoritme = BegripGegevens(
         begripLabel=algorithm_norm, begripBegrippenlijst=verwijzingBegrippenlijst
     )
