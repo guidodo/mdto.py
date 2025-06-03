@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 from datetime import datetime
@@ -307,13 +308,14 @@ def create_checksum(
         ChecksumGegevens: checksum metadata from `file_or_filename`
     """
     infile = helpers.process_file(file_or_filename)
-    verwijzing = VerwijzingGegevens(
+    verwijzingBegrippenlijst = VerwijzingGegevens(
         verwijzingNaam="Begrippenlijst ChecksumAlgoritme MDTO"
     )
 
+    # normalize algorithm name; i.e. uppercase it and insert a dash, like the NA
+    algorithm_norm = re.sub(r"(SHA)(\d+)", r"\1-\2", algorithm.upper())
     checksumAlgoritme = BegripGegevens(
-        begripLabel=algorithm.upper().replace("SHA", "SHA-"),
-        begripBegrippenlijst=verwijzing,
+        begripLabel=algorithm_norm, begripBegrippenlijst=verwijzingBegrippenlijst
     )
 
     # file_digest() expects a file in binary mode, hence `infile.buffer.raw`
